@@ -1,75 +1,120 @@
-import openai
+import os
+import re
+import nltk
+import spacy
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# Load filenames from text files
-with open('../background_file_names.txt', 'r') as f:
-    background_filenames = f.readlines()
-    background_filenames = [name.strip() for name in background_filenames]
+# Initialize the VADER sentiment analyzer
+nltk.download('vader_lexicon')
+sid = SentimentIntensityAnalyzer()
 
-with open('../character_file_names.txt', 'r') as f:
-    character_filenames = f.readlines()
-    character_filenames = [name.strip() for name in character_filenames]
+# Initialize spaCy
+nlp = spacy.load("en_core_web_sm")
 
-def select_assets(parsed_scenes):
-    assets = []
-    for scene in parsed_scenes:
-        scene_assets = {
-            "background": "",  # Placeholder for background
-            "characters": [],
-            "dialogue": scene["dialogue"]
-        }
-        location = scene['location']
-        scene_number = location.split()[-1]  # Extracting the number from location
-        # Get background image
-        background_image = background_filenames[int(scene_number) % len(background_filenames)]
-        scene_assets["background"] = f"backgrounds/{background_image}.jpg"
+# Path to assets directory
+ACTION_VIDEO_DIR = "../assets/characters/actions/"
+EMOTION_VIDEO_DIR = "../assets/characters/emotions/"
+IMAGE_DIR = "../assets/backgrounds/"
 
-        for character in scene["characters"]:
-            # Prompt for character video selection
-            prompt = f"Select the character video for {character['action']} in scene {location}: "
-            prompt += f"\"The vlog will be in first person. Most of the time that is the only character. "
-            prompt += f"All character videos are some verb phrase, but many of them are emotions with 'Being some emotion', "
-            prompt += f"and the reset are action verb phrases. When deciding which character video to use, "
-            prompt += f"if there is an action verb phrase video, use that; only use an emotion phrase video if there are no suitable action verb phrase videos. "
-            prompt += f"Give a greater chance of picking the same action/emotion with the smaller number at the end. "
-            prompt += f"Also give a greater chance of picking the same location image with the smaller number at the end. "
-            prompt += f"The character videos with parentheses (someone else) at the end means this character video only meant for another character that is not first person. "
-            prompt += f"A character video that doesn’t have these parentheses can be used for any character.\""
-            
-            # Select character video using OpenAI API
-            response = openai.Completion.create(
-                engine="davinci",
-                prompt=prompt,
-                max_tokens=50,
-                n=1,
-                stop=None,
-                temperature=0.5,
-                top_p=1.0,
-                frequency_penalty=0.0,
-                presence_penalty=0.0
-            )
-            character_video = response.choices[0].text.strip()
+# Function to perform sentiment analysis on text
+def analyze_sentiment(text):
+    sentiment_score = sid.polarity_scores(text)
+    emotion = max(sentiment_score, key=sentiment_score.get)
+    return emotion
 
-            character_asset = {
-                "name": character_video,
-                "video": "",  # Placeholder for video filename
-                "enter": character['enter'],
-                "duration": character['duration'],
-                "exit": character['exit']
-            }
-            # Get character video filename
-            character_video_filename = character_video.lower().replace(' ', '_') + ".mp4"
-            # Check if the filename exists in character filenames list
-            if character_video_filename in character_filenames:
-                character_asset["video"] = f"characters/{character_video_filename}"
-            else:
-                # If filename doesn't exist, use a default name
-                character_asset["video"] = f"characters/default_character.mp4"
+# Function to find the most suitable video based on emotion and action
+def find_emotion_video(emotion, action):
+    # List all video files in the actions directory
+    video_files = os.listdir(EMOTION_VIDEO_DIR)
+    suitable_videos = []
+    # Check if video name contains emotion or action
+    for video in video_files:
+        # Calculate similarity score between video name and action
+        if emotion.lower() in video.lower():
+            suitable_videos.append(video)
+    if suitable_videos:
+        return suitable_videos[0]  # Return the first suitable video
+    else:
+        return None
+def find_action_video(action):
+    # List all video files in the actions directory
+    video_files = os.listdir(ACTION_VIDEO_DIR)
+    suitable_videos = []
+    # Check if video name contains emotion or action
+    for video in video_files:
+        # Calculate similarity score between video name and action
+        similarity_score = fuzz.partial_ratio(video.lower(), action.lower())
+        if similarity_score > 80:
+            suitable_videos.append(video)
+    if suitable_videos:
+        return suitable_videos[0]  # Return the first suitable video
+    else:
+        return None
 
-            scene_assets["characters"].append(character_asset)
+# Function to find the most suitable background image based on location description
+def find_background(location):
+    # List all image files in the backgrounds directory
+    image_files = os.listdir(IMAGE_DIR)
+    suitable_images = []
+    # Check if image name contains location
+    for image in image_files:
+        if location.lower() in image.lower():
+            suitable_images.append(image)
+    if suitable_images:
+        return suitable_images[0]  # Return the first suitable image
+    else:
+        return None
 
-        assets.append(scene_assets)
-    return assets
+# Read the script file
+with open("script.txt", "r") as f:
+    script = f.read()
 
-# Call the function with parsed scenes
-assets = select_assets(parsed_scenes)
-print(assets)
+# Split the script into scenes
+scenes = re.split(r"\n\d+\.", script)[1:]
+
+# Process each scene
+for scene in scenes:
+    # Extract location, characters, actions, and dialogues
+    location_match = re.search(r"Location: (.*?)\n", scene)
+    characters_match = re.search(r"Characters: (.*?)\n", scene)
+    actions_match = re.search(r"Action:(.*?)\n", scene, re.DOTALL)
+    dialogue_match = re.search(r"Dialogue:(.*?)\n", scene, re.DOTALL)
+
+    if location_match and characters_match and actions_match:
+        location = location_match.group(1).strip()
+        characters = characters_match.group(1).strip().split("\n")
+        actions = actions_match.group(1).strip().split("\n")
+        dialogues = dialogue_match.group(1).strip()
+
+        # Extract verbs from action descriptions
+        action_verbs = []
+        for action in actions:
+            doc = nlp(action)
+            for token in doc:
+                if token.pos_ == "VERB":
+                    action_verbs.append(token.lemma_)
+
+        # If action is 'being', analyze sentiment of emotion
+        if "being" in action_verbs:
+            emotion = analyze_sentiment(" ".join(actions))
+            video = find_emotion_video(emotion, "being")
+        else:
+            # If action is not 'being', summarize and match with video
+            summarized_action = " ".join(action_verbs)
+            video = find_action_video("", summarized_action)
+
+        background_image = find_background(location)
+
+        if video and background_image:
+            print("Scene:", location)
+            print("Characters:", ", ".join(characters))
+            print("Action:", actions[0])
+            print("Selected Video:", video)
+            print("Selected Background Image:", background_image)
+            print("\n")
+        else:
+            print("Scene:", location)
+            print("Characters:", ", ".join(characters))
+            print("Action:", actions[0])
+            print("No suitable video or background image found.")
+            print("\n")
