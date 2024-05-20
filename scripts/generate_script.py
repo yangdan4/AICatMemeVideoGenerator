@@ -3,28 +3,31 @@ import openai
 def generate_script(prompt):
     openai.api_key = 'YOUR_API_KEY'
     
-
     structured_prompt = (
         "You are a screenwriter. Write a script for a video where the main character is first person. "
         "The script should be divided into scenes. Each scene should include the following elements: "
         "1. Location: Describe the location. "
         "2. Characters: List the characters involved and for each character provide:\n"
         "   a. Identity: Who is this character, is the character first person or some side character.\n"
-        "   b. Action: Describe the action. If it is better in this scene for the character to not do an active action and just express emotion, just use the verb \'being\'\n"
-        "   c. Emotion: Describe the emotion, use a phrase like \"Being \{some emotion\}\" to describe an emotion.\n"
-        "   d. Enter: Enter time and animation.\n"
-        "   e. Duration: How long the character stays.\n"
-        "   f. Exit: Exit time and animation.\n"
-        "3. Dialogue: Write the dialogue between the characters, or this could describe characters are doing if there is no dialogue.\n"
+        "   b. Action: Describe the action, or 'Being' if there is no action and the character purely feels some emotion.  You must strictly only use actions from the list provided later. Do not use any emotions outside of this list, even if they seem appropriate.\n"
+        "   c. Words: Write the words that the character says, or this could be inner dialogue if the main character is not saying anything. You must preserve the plot content as much as possible. Must not use any placeholders. Must not use any words to describe what the scene is.\n"
+        "   d. Emotion: Describe the emotion, use a phrase like \"Being \{some emotion\}\" to describe an emotion. You must strictly only use emotions from the list provided later. Do not use any emotions outside of this list, even if they seem appropriate.\n"
+        "   e. Enter: Enter time in minutes and seconds.\n"
+        "   f. Duration: How long the character stays.\n"
+        "   g. Exit: Exit time in minutes and seconds.\n"
         "Each element should be clearly labeled.\n"
         "The vlog will be in first person. Most of the time, that is the only character.\n"
+        "All time formats must be in mm:ss\n"
+        "You must put \'Characters:\'\n"
+        "However, if it makes sense for multiple characters to appear on screen at the same time, then do it. Make sure the Enter and Exit times of different characters overlap in this case.\n"
+        "For each scene, strictly make sure that the time for the first 'Enter' starts at 00:00.\n"
         "Make each scene at most 5 seconds.\n"
-        "The emotion has to be \"Being\" and then one emotion adjective.\n"
-        "Pick an emotion from the following list. If the emotion you want does not exist in the list, use your best judgement to pick a similar emotion from the list. If there are multiple emotions from the following list that match, then pick one randomly.\n"
+        "Pick an emotion from the following list. If the emotion you want does not exist in the list, use your best judgement to pick a similar emotion from the list.\n"
+        "Important: You must strictly only use emotions from the list provided below. Do not use any emotions outside of this list, even if they seem appropriate.\n"
         '''
             Being confident or satisfied
             Being very sad
-            Being Happy
+            Being happy
             Being schrewd
             Being amazed
             Being confused
@@ -48,8 +51,11 @@ def generate_script(prompt):
             Being excited2
             Being disgusted
         '''
-        "Pick an action from the following list. If the action you want does not exist in the list, use your best judgement to pick a similar action from the list. If there are multiple actions from the following list that match, then pick one randomly. If the action is for another character that is not the main character, and there is a matching action in the below list with (someone else), pick it. If the action is for the main character, do not use any of the below list with (someone else).\n"
-        '''Running
+        "Pick an action from the following list. If the action you want does not exist in the list, or there is no similar one, just strictly use the verb 'Being'. If the action is for another character that is not the main character, and there is a matching action in the below list with (someone else), pick it. If the action is for the main character, do not use any of the below list with (someone else).\n"
+        "Important: You must strictly only use actions from the list provided below. Do not use any actions outside of this list, even if they seem appropriate. If no action in the list fits, use the verb 'Being' instead.\n"
+        '''
+            Being
+            Running
             Taking a selfie
             Boss talking (someone else)
             Jogging
@@ -80,8 +86,9 @@ def generate_script(prompt):
             Talking 2 (someone else)
             Looking forward to something
             Strongly disagree
-            Crying'''
-        "Pick a location from the following list. If the location you want does not exist in the list, use your best judgement to pick a similar location from the list. If there are multiple locations from the following list that match, then pick one randomly.\n"
+            Crying \n'''
+        "Pick a location from the following list. If the location you want does not exist in the list, use your best judgement to pick a similar location from the list.\n"
+        "Important: You must strictly only use locations from the list provided below. Do not use any locations outside of this list, even if they seem appropriate.\n"
         '''
         inside train 1
         street in autumn 1
@@ -210,8 +217,7 @@ def generate_script(prompt):
         railroad crossing 1
         '''
         "Use this format to write the script for the following plot:\n\n"
-        f"{prompt}"
-    )
+        f"{prompt}")
     
     response = openai.Completion.create(
         engine="text-davinci-003",
