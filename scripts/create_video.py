@@ -6,59 +6,59 @@ import re
 script = """
 
 Scene 1
-
-Location: Single Room 1
-
+Location: street in summer
 Characters:
+Identity: 私
+Action: Running
+Words: あ、ゴキブリだ！
+Emotion: Being surprised
+Enter: 00:00:00
+Time: 00:00:05
+Exit: 00:00:05
 
-Main Character:
-
-Identity: First person
-Action: Sleeping
-Words: "I was so tired as I did not sleep well last night."
-Emotion: Being tired
-Enter: 0:00
-Time: 0:05
-Exit: 0:05
 Scene 2
-
-Location: Medium Office
-
+Location: street in summer
 Characters:
+Identity: 友達
+Action: Running
+Words: うわ、踏んじゃった！
+Emotion: Being surprised
+Enter: 00:00:05
+Time: 00:00:05
+Exit: 00:00:10
 
-Main Character:
-
-Identity: First person
-Action: Using a computer
-Words: "Then at work today my boss just gave me a load of very boring tasks."
-Emotion: Being very sad
-Enter: 0:05
-Time: 0:05
-Exit: 0:10
-Boss:
-
-Identity: Side character
-Action: Boss talking (someone else)
-Words: "Here are some tasks for you to complete today."
-Emotion: None
-Enter: 0:06
-Time: 0:04
-Exit: 0:10
 Scene 3
-
-Location: Medium Office
-
+Location: street in summer
 Characters:
+Identity: 私
+Action: Realizing
+Words: ひどい...
+Emotion: Being sad
+Enter: 00:00:10
+Time: 00:00:05
+Exit: 00:00:15
 
-Main Character:
+Scene 4
+Location: street in summer
+Characters:
+Identity: 友達
+Action: Realizing
+Words: ごめん、私も気づかなかった。
+Emotion: Being sad
+Enter: 00:00:15
+Time: 00:00:05
+Exit: 00:00:20
 
-Identity: First person
-Action: Strongly disagree
-Words: "I hate him so much!"
-Emotion: Being angry
-Enter: 0:10
-Time: 0:05
-Exit: 0:15
+Scene 5
+Location: street in summer
+Characters:
+Identity: 私
+Action: Running
+Words: 次は気をつけよう。
+Emotion: Being sad
+Enter: 00:00:20
+Time: 00:00:05
+Exit: 00:00:25
 
 """
 
@@ -154,7 +154,7 @@ for line in script.split("\n"):
     elif line.startswith("Action:"):
         current_char["action"] = line.split(":")[1].strip()
     elif line.startswith("Words:"):
-        current_char["words"] = line.split(":")[1].strip().replace("\"", "")
+        current_char["words"] = line.split(":")[-1].strip().replace("\"", "")
     elif line.startswith("Emotion:"):
         current_char["emotion"] = line.split(":")[1].strip()
     elif line.startswith("Enter:"):
@@ -215,11 +215,19 @@ for scene in scenes:
 
         # Get the character video dimensions
         if len(scene["characters"]) > 1:
+            # forbid greater than 4 chars
             if char == scene["characters"][0]:
                 x = -WINDOW_WIDTH // 6
-            else:
+                y = WINDOW_HEIGHT // 4
+            elif char == scene["characters"][1]:
                 x = WINDOW_WIDTH // 4
-            y = WINDOW_HEIGHT // 4
+                y = WINDOW_HEIGHT // 4
+            elif char == scene["characters"][2]:
+                x = -WINDOW_WIDTH // 6
+                y = -WINDOW_HEIGHT // 6
+            elif char == scene["characters"][3]:
+                x = WINDOW_WIDTH // 4
+                y = -WINDOW_HEIGHT // 6
             background = overlay_videos(background, char_video, x, y, enter)
         else:
             x = 0
@@ -234,7 +242,7 @@ for scene in scenes:
             # Generate subtitle entry
             start_time_formatted = convert_to_time_format(char["enter"])
             end_time_formatted = convert_to_time_format(char["exit"])
-            if "First person" in identity:
+            if "first person" or "main character" in identity.lower():
                 text = "Me: " + char["words"]
             else:
                 text = f'{identity.split(" (")[0]}: ' + char["words"]
