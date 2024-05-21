@@ -2,64 +2,104 @@ import os
 import ffmpeg
 import re
 
+from pydub import AudioSegment
+
 # Define the script
 script = """
-
-Scene 1
-Location: street in summer
-Characters:
-Identity: 私
-Action: Running
-Words: あ、ゴキブリだ！
-Emotion: Being surprised
-Enter: 00:00:00
-Time: 00:00:05
-Exit: 00:00:05
-
-Scene 2
+Scene Index: 1
 Location: street in summer
 Characters:
 Identity: 友達
 Action: Running
-Words: うわ、踏んじゃった！
-Emotion: Being surprised
-Enter: 00:00:05
-Time: 00:00:05
-Exit: 00:00:10
+Words: 走ろう！
+Emotion: Being happy
+Enter: 00:00
+Time: 00:05
+Exit: 00:05
 
-Scene 3
-Location: street in summer
-Characters:
 Identity: 私
-Action: Realizing
-Words: ひどい...
-Emotion: Being sad
-Enter: 00:00:10
-Time: 00:00:05
-Exit: 00:00:15
+Action: Running
+Words: うん、行こう！
+Emotion: Being happy
+Enter: 00:00
+Time: 00:05
+Exit: 00:05
 
-Scene 4
+Scene Index: 2
 Location: street in summer
 Characters:
 Identity: 友達
-Action: Realizing
-Words: ごめん、私も気づかなかった。
-Emotion: Being sad
-Enter: 00:00:15
-Time: 00:00:05
-Exit: 00:00:20
+Action: Running
+Words: ゴールはあそこだ！
+Emotion: Being excited
+Enter: 00:05
+Time: 00:05
+Exit: 00:10
 
-Scene 5
+Identity: 私
+Action: Running
+Words: わかった、頑張る！
+Emotion: Being excited
+Enter: 00:05
+Time: 00:05
+Exit: 00:10
+
+Scene Index: 3
 Location: street in summer
 Characters:
 Identity: 私
 Action: Running
-Words: 次は気をつけよう。
-Emotion: Being sad
-Enter: 00:00:20
-Time: 00:00:05
-Exit: 00:00:25
+Words: あっ！
+Emotion: Being surprised
+Enter: 00:10
+Time: 00:05
+Exit: 00:15
 
+Identity: 友達
+Action: Running
+Words: どうしたの？
+Emotion: Being confused
+Enter: 00:10
+Time: 00:05
+Exit: 00:15
+
+Scene Index: 4
+Location: street in summer
+Characters:
+Identity: 私
+Action: Running
+Words: ゴキブリを踏んじゃった！
+Emotion: Being disgusted
+Enter: 00:15
+Time: 00:05
+Exit: 00:20
+
+Identity: 友達
+Action: Running
+Words: ええっ、本当？！
+Emotion: Being surprised
+Enter: 00:15
+Time: 00:05
+Exit: 00:20
+
+Scene Index: 5
+Location: street in summer
+Characters:
+Identity: 私
+Action: Running
+Words: 気持ち悪い…最悪だ…
+Emotion: Being sad
+Enter: 00:20
+Time: 00:05
+Exit: 00:25
+
+Identity: 友達
+Action: Running
+Words: 大丈夫、気にしないで！
+Emotion: Being supportive
+Enter: 00:20
+Time: 00:05
+Exit: 00:25
 """
 
 assets_dir = "../assets"
@@ -80,8 +120,6 @@ def get_sec(time_str):
 
 # Define utility functions
 def load_video(path, duration, video_width, video_height):
-    print("pathpathpathpathpathpathpathpathpathpathpathpath")
-    print(path)
     probe = ffmpeg.probe(path)
 
     for stream in probe['streams']:
@@ -130,27 +168,29 @@ WINDOW_HEIGHT = 720
 
 SMALLER_EMOTIONS = ['cold', 'confused', 'evil', 'excited2']
 SMALLER_ACTIONS = ['Coding', "Driving", 'Driving2', 'Enjoying', 'Looking forward', "Loving", "Playing piano", "Taking a selfie", "Talking 2"]
-
-# Parse the script
 scenes = []
-current_scene = {}
-current_char = {}
+current_scene = None
+current_char = None
 
 for line in script.split("\n"):
     line = line.strip()
 
     if line.startswith("Scene"):
         if current_scene:
+            if current_char:
+                current_scene["characters"].append(current_char)
+                current_char = None
             scenes.append(current_scene)
-            current_scene = {}
-        current_scene["scene"] = line
+        current_scene = {"index": line.split(":")[1].strip(), "characters": []}
+        current_scene['scene'] = line
     elif line.startswith("Location:"):
         current_scene["location"] = line.split(":")[1].strip()
     elif line.startswith("Characters:"):
-        current_scene.setdefault("characters", []).append({})
-        current_char = current_scene["characters"][-1]
+        pass  # This line indicates the start of characters for a scene
     elif line.startswith("Identity:"):
-        current_char["identity"] = line.split(":")[1].strip()
+        if current_char:
+            current_scene["characters"].append(current_char)
+        current_char = {"identity": line.split(":")[1].strip()}
     elif line.startswith("Action:"):
         current_char["action"] = line.split(":")[1].strip()
     elif line.startswith("Words:"):
@@ -164,9 +204,11 @@ for line in script.split("\n"):
     elif line.startswith("Exit:"):
         current_char["exit"] = get_sec(line.split(":")[1].strip() + ":" + line.split(":")[2].strip())
 
+# Add the last character and scene to the list
+if current_char:
+    current_scene["characters"].append(current_char)
 if current_scene:
     scenes.append(current_scene)
-
 # Collect all subtitles into one list
 subtitles = []
 subtitle_index = 1
@@ -182,6 +224,7 @@ for scene in scenes:
     location = scene["location"].replace(" ", "_")
     scene_end = max(char["exit"] for char in scene.get("characters", []))
     scene_duration = max(char["exit"] for char in scene.get("characters", [])) - min(char["enter"] for char in scene.get("characters", []))
+    
 
     background_image = load_image(os.path.join(backgrounds_dir, f"{location}.jpg"), scene_duration)
     background = (
@@ -190,7 +233,6 @@ for scene in scenes:
         .filter("setpts", "PTS-STARTPTS")  # Reset timestamps
     )
     audio_streams = []
-
     for char in scene.get("characters", []):
         identity = char["identity"]
         action = char["action"]
@@ -206,7 +248,11 @@ for scene in scenes:
                 video_width = WINDOW_WIDTH // 4
                 video_height = WINDOW_HEIGHT // 4
         else:
-            video_path = os.path.join(characters_dir, "actions", f"{action}.mp4")
+
+            if not '私' in identity and not 'I' in identity and not 'Me' and not '我' in identity and action == 'Talking':
+                video_path = os.path.join(characters_dir, "actions", f"{action} (someone else).mp4")
+            else:
+                video_path = os.path.join(characters_dir, "actions", f"{action}.mp4")
             if any_substring_in_string(SMALLER_ACTIONS, action):
                 video_width = WINDOW_WIDTH // 4
                 video_height = WINDOW_HEIGHT // 4
@@ -236,30 +282,31 @@ for scene in scenes:
         
         # Append the audio stream from this character video
         delay_ms = enter * 1000
-        audio_streams.append(ffmpeg.input(video_path).audio.filter('adelay', f'{delay_ms}|{delay_ms}').filter('asetpts', 'PTS-STARTPTS'))
+        audio_segment = AudioSegment.from_file(video_path)
+        delayed_audio = AudioSegment.silent(duration=delay_ms) + audio_segment
+
+        audio_streams.append(delayed_audio)
 
         if char["words"]:
+            char["words"] = char["words"].split(" (")[0]
             # Generate subtitle entry
             start_time_formatted = convert_to_time_format(char["enter"])
             end_time_formatted = convert_to_time_format(char["exit"])
-            if "first person" or "main character" in identity.lower():
-                text = "Me: " + char["words"]
-            else:
-                text = f'{identity.split(" (")[0]}: ' + char["words"]
+            text = f'{identity.split(" (")[0]}: ' + char["words"]
             subtitles.append(f"{subtitle_index}\n{start_time_formatted} --> {end_time_formatted}\n{text}\n")
             subtitle_index += 1
 
-    merged_audio = ffmpeg.filter(audio_streams, 'amix', inputs=len(audio_streams)).filter('atrim', duration=scene_duration).output(f'audio_{ind}.mp3')
-    merged_audio.run(overwrite_output=True)
+    # Use pydub to merge audio
+    combined_audio = sum(audio_streams)
+    combined_audio.export(f'combined_audio_{ind}.mp3', format='mp3')
     scene_video_path = f'output_{location}_{ind}.mp4'
-    scene_audio_path = f'audio_{ind}.mp3'
+    scene_audio_path = f'combined_audio_{ind}.mp3'
     background.output(scene_video_path, vcodec='libx264', acodec='aac').run(overwrite_output=True)
     
     
     scene_videos.append(ffmpeg.input(scene_video_path).video)
     scene_videos.append(ffmpeg.input(scene_audio_path).audio)
     ind += 1
-
     elapsed_time += scene_duration
 
 # Concatenate all scene videos into a single video

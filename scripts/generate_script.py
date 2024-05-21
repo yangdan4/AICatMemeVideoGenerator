@@ -8,17 +8,17 @@ def generate_script(prompt):
 f"""
 
 
-You are a screenwriter. Write a script for a video in plain text (not markdown). The script should be divided into scenes. Each scene should include the following elements:
-
+You are a screenwriter. Write a script for a video in plain text (not markdown). The script should be divided into scenes. Each scene should include the following elements.:
+Scene Index
 Location: Describe the location. Only use locations from the provided list.
 Characters:
 Identity: Only names or pronouns. If the plot is in Japanese, write this in Japanese. If the plot is in Chinese, write this in Chinese.
 Action: Describe the action.
 Words: Write the words that the character says, or this could be inner dialogue if the main character is not saying anything. If the plot is in Japanese, write this in Japanese. If the plot is in Chinese, write this in Chinese.
 Emotion: Describe the emotion.
-Enter: Enter time in minutes and seconds.
-Time: How long the character stays in minutes and seconds..
-Exit: Exit time in minutes and seconds.
+Enter: Enter time in minutes and seconds in two digit minutes:two digit seconds
+Time: How long the character stays in minutes and seconds in  two digit minutes:two digit seconds
+Exit: Exit time in minutes and seconds in two digit minutes:two digit seconds
 
 Use this format to write the script for the following plot:
 
@@ -38,8 +38,8 @@ Important Instructions:
 10. If the emotion is a negative one and there is no suitable one from the list, use 'Being sad'
 11. If the emotion is a positive one and there is no suitable one from the list, use 'Being happy'
 12. If there is no suitable action to pick from the list, use 'Running'
-13. For side characters, if an appropriate action exists in the list with the suffix "(someone else)", use it.
-14. If the plot is not in English, you should change to that language for 'Identity' and 'Words', keep the rest in English.
+13. If the plot is not in English, you should change to that language for 'Identity' and 'Words', keep the rest in English.
+14. Make characters that are doing something together, overlap in their Enter and Exit times.
 
 
 Now, take the script you created and modify it so it strictly uses similar emotions and actions only from the provided actions and emotions of the below lists.
