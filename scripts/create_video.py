@@ -4,112 +4,62 @@ import re
 
 # Define the script
 script = """
+
 Scene 1
 
-Location: street in autumn 1
+Location: Single Room 1
 
 Characters:
 
-Main Character (MC)
+Main Character:
+
 Identity: First person
-Action: Being
-Words: (Inner dialogue) "Another long day at school."
+Action: Sleeping
+Words: "I was so tired as I did not sleep well last night."
 Emotion: Being tired
-Enter: 00:00
-Time: 00:05
-Exit: 00:05
-Location: street in autumn 1
-
-Characters:
-
-Mayu
-Identity: Hot celebrity
-Action: Walking
-Words: (Inner dialogue) "I hope no one notices me."
-Emotion: Being cool
-Enter: 00:03
-Time: 00:02
-Exit: 00:05
+Enter: 0:00
+Time: 0:05
+Exit: 0:05
 Scene 2
 
-Location: street in autumn 1
+Location: Medium Office
 
 Characters:
 
-Main Character (MC)
+Main Character:
+
 Identity: First person
-Action: Being
-Words: (Inner dialogue) "Wait, is that... Mayu?"
-Emotion: Being excited2
-Enter: 00:05
-Time: 00:05
-Exit: 00:10
+Action: Using a computer
+Words: "Then at work today my boss just gave me a load of very boring tasks."
+Emotion: Being very sad
+Enter: 0:05
+Time: 0:05
+Exit: 0:10
+Boss:
+
+Identity: Side character
+Action: Boss talking (someone else)
+Words: "Here are some tasks for you to complete today."
+Emotion: None
+Enter: 0:06
+Time: 0:04
+Exit: 0:10
 Scene 3
 
-Location: street in autumn 1
+Location: Medium Office
 
 Characters:
 
-Main Character (MC)
+Main Character:
+
 Identity: First person
-Action: Being nervous
-Words: (Inner dialogue) "What should I do? Should I talk to her?"
-Emotion: Being nervous
-Enter: 00:10
-Time: 00:05
-Exit: 00:15
-Scene 4
+Action: Strongly disagree
+Words: "I hate him so much!"
+Emotion: Being angry
+Enter: 0:10
+Time: 0:05
+Exit: 0:15
 
-Location: street in autumn 1
-
-Characters:
-
-Main Character (MC)
-Identity: First person
-Action: Taking orders
-Words: "Mayu!"
-Emotion: Being nervous
-Enter: 00:15
-Time: 00:05
-Exit: 00:20
-Location: street in autumn 1
-
-Characters:
-
-Mayu
-Identity: Hot celebrity
-Action: Being confused
-Words: "Huh? Who's that?"
-Emotion: Being confused
-Enter: 00:18
-Time: 00:02
-Exit: 00:20
-Scene 5
-
-Location: street in autumn 1
-
-Characters:
-
-Main Character (MC)
-Identity: First person
-Action: Being
-Words: (Inner dialogue) "I can't believe it. She's so rude."
-Emotion: Being surprised2
-Enter: 00:22
-Time: 00:03
-Exit: 00:25
-
-Characters:
-
-Mayu
-Identity: Hot celebrity
-Action: Being disgusted
-Words: "Ew, a fanboy."
-Emotion: Being disgusted
-Enter: 00:20
-Time: 00:05
-Exit: 00:25
-Location: street in autumn 1
 """
 
 assets_dir = "../assets"
@@ -130,6 +80,8 @@ def get_sec(time_str):
 
 # Define utility functions
 def load_video(path, duration, video_width, video_height):
+    print("pathpathpathpathpathpathpathpathpathpathpathpath")
+    print(path)
     probe = ffmpeg.probe(path)
 
     for stream in probe['streams']:
@@ -248,7 +200,7 @@ for scene in scenes:
         exit = char["exit"] - elapsed_time
         video_width = WINDOW_WIDTH // 2
         video_height = WINDOW_HEIGHT // 2
-        if "None" in action or "Being" in action:
+        if "None" in action or "Feeling" in action:
             video_path = os.path.join(characters_dir, "emotions", f"{emotion}.mp4")
             if any_substring_in_string(SMALLER_EMOTIONS, emotion):
                 video_width = WINDOW_WIDTH // 4
