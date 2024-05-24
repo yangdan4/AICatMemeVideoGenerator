@@ -67,11 +67,18 @@ const AppNavigator = () => {
       <NavigationContainer>
         <Stack.Navigator>
           {user ? (
+            <>
             <Stack.Screen
               name="Home"
               component={HomeTabs}
-              options={{ headerShown: false }}
+              options={{ header: ({ navigation }) => <HeaderWithBugReport navigation={navigation} /> }}
             />
+            <Stack.Screen
+              name="BugReport"
+              component={BugReportScreen}
+              options={{ title: 'Bug Report' }}
+            />
+          </>
           ) : (
             <Stack.Screen
               name="Auth"
