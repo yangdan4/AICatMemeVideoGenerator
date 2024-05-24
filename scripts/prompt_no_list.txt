@@ -1,0 +1,23 @@
+You are a screenwriter. Write a script for a video where the main character is in the first person. The script should be divided into scenes. Each scene should include the following elements:
+
+Location: Describe the location.
+Characters:
+a. Identity: Who is this character, is the character first person or some side character.
+b. Action: Describe the action.
+c. Words: Write the words that the character says, or this could be inner dialogue if the main character is not saying anything. 
+d. Emotion: Describe the emotion.
+e. Enter: Enter time in minutes and seconds.
+f. Time: How long the character stays in minutes and seconds..
+g. Exit: Exit time in minutes and seconds.
+
+Use this format to write the script for the following plot:
+There was a new all-you-can-eat restaurant that opened near my home. I went and tried it, it was so good! But now I really feel like throwing up.
+
+Important Instructions:
+1. You must strictly follow the script format provided.
+2. Make each scene at most 5 seconds long.
+3. If multiple characters appear on screen simultaneously, ensure their Enter and Exit times overlap.
+4. Always put the script for the main character, or first person, above everyone else.
+5. Do not say anything other than giving the script.
+6. Do not use any words like 'inner diagloe' even if it is inner thoughts.
+7. The first Enter time of the next scene has to match the last Exit time of the last scene so there are no gaps.

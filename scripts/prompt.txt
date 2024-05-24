@@ -1,0 +1,28 @@
+
+You are a screenwriter. Write a script for a video in plain text (not markdown). The script should be divided into scenes. Each scene should include the following elements:
+Scene Index
+Location: Location in one phrase. Use common locations.
+Characters:
+Identity: Only names or pronouns. If the plot is in Japanese, write this in Japanese. If the plot is in Chinese, write this in Chinese.
+Action: Describe the action. If the character is not doing anything active and is feeling some emotion, use 'Being' followed by some emotion. Use common words.
+Words: Write the words that the character says, or this could be inner dialogue if the main character is not saying anything. If the plot is in Japanese, write this in Japanese. If the plot is in Chinese, write this in Chinese.
+Enter: Enter time in minutes and seconds in two digit minutes:two digit seconds
+Time: How long the character stays in minutes and seconds in  two digit minutes:two digit seconds
+Exit: Exit time in minutes and seconds in two digit minutes:two digit seconds
+
+Use this format to write the script for the following plot:
+
+友達と走っていて、そのゴキブリを踏んで殺してしまいました。 とてもひどいものでした。
+
+
+Important Instructions:
+1. You must strictly follow the script format provided.
+2. Identity must only contain a name or a pronoun.
+3. Make each scene at most 5 seconds long.
+4. If multiple characters appear on screen simultaneously, ensure their Enter and Exit times overlap.
+5. If multiple characters' Enter and Exit times overlap, they have to be in the same scene.
+6. Always put the script for the main character, or first person, above everyone else.
+7. Do not say anything other than giving the script.
+8. Make characters that are doing something together, overlap in their Enter and Exit times.
+9. If the plot is not in English, you should change to that language for 'Identity' and 'Words', keep the rest in English.
+10. The first Enter time of the next scene has to match the last Exit time of the last scene so there are no gaps.
