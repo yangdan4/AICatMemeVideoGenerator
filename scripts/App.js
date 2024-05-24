@@ -14,10 +14,11 @@ import { Button } from 'react-native-paper';
 import VideoManagementScreen from './VideoManagementScreen';
 import { VideoProvider } from './VideoContext';
 import SettingsScreen from './SettingsScreen';
+import apiKey from './firebase_key';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyC5TlGqvH-IfD9CXNVXx9_Y6H-SqUDpfZ8",
+  apiKey: apiKey,
   authDomain: "aicatmemevideogenerator.firebaseapp.com",
   projectId: "aicatmemevideogenerator",
   storageBucket: "aicatmemevideogenerator.appspot.com",
