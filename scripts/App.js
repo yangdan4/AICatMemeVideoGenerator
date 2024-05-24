@@ -78,6 +78,11 @@ const AppNavigator = () => {
               component={BugReportScreen}
               options={{ title: 'Bug Report' }}
             />
+            <Stack.Screen
+              name="TicketDetail"
+              component={TicketDetailScreen}
+              options={{ title: 'Ticket Detail' }}
+            />
           </>
           ) : (
             <Stack.Screen
