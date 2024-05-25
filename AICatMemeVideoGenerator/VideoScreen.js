@@ -8,6 +8,7 @@ import { VideoContext } from './VideoContext';
 import auth from '@react-native-firebase/auth';
 import RNFetchBlob from 'rn-fetch-blob';
 import { serverHost, serverPort } from './consts';
+import { fetchWithToken } from './api';
 
 export default function VideoScreen({ navigation }) {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ export default function VideoScreen({ navigation }) {
   const sendVideoPrompt = async () => {
     setIsSending(true);
     try {
-      const response = await fetch(`http://${serverHost}:${serverPort}/create_content`, {
+      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/create_content`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

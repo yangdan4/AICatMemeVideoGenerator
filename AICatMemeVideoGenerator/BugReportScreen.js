@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
 import { v4 as uuidv4 } from 'uuid';
+import { fetchWithToken } from './api';
 
 export default function BugReportScreen({ route, navigation }) {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export default function BugReportScreen({ route, navigation }) {
     });
 
     try {
-      const response = await fetch(`http://${serverHost}:${serverPort}/submit_bug_report`, {
+      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/submit_bug_report`, {
         method: 'POST',
         body: formData,
       });

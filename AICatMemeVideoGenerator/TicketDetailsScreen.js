@@ -4,6 +4,7 @@ import { Text, TextInput, Button, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
+import { fetchWithToken } from './api';
 
 export default function TicketDetailScreen({ route }) {
   const { t } = useTranslation();
@@ -18,7 +19,7 @@ export default function TicketDetailScreen({ route }) {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetch(`http://${serverHost}:${serverPort}/get_ticket_messages?ticket_id=${ticket.ticket_id}`);
+      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_ticket_messages?ticket_id=${ticket.ticket_id}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -49,7 +50,7 @@ export default function TicketDetailScreen({ route }) {
     formData.append('message', message);
 
     try {
-      const response = await fetch(`http://${serverHost}:${serverPort}/add_message`, {
+      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/add_message`, {
         method: 'POST',
         body: formData,
       });

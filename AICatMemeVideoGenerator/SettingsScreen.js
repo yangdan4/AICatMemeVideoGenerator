@@ -21,7 +21,6 @@ export default function SettingsScreen({ navigation }) {
     try {
       await auth().signOut();
       setUser(null);
-      navigation.navigate('VideoScreen');
     } catch (error) {
       console.error('Failed to logout: ' + error.message);
     }

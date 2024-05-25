@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Provider as PaperProvider } from 'react-native-paper';
+import { Provider as PaperProvider, Text } from 'react-native-paper';
 import AuthScreen from './AuthScreen';
 import VideoScreen from './VideoScreen';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +15,7 @@ import { Button } from 'react-native-paper';
 import VideoManagementScreen from './VideoManagementScreen';
 import { VideoProvider } from './VideoContext';
 import SettingsScreen from './SettingsScreen';
-import apiKey from './firebase_key';
+import {apiKey} from './firebase_key';
 import BugReportScreen from './BugReportScreen';
 import HeaderWithBugReport from './HeaderWithBugReport';
 import SupportTicketsScreen from './SupportTicketsScreen';
@@ -59,12 +59,27 @@ const HomeTabs = () => {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
+        tabBarLabel: ({ color }) => {
+          let label;
+
+          if (route.name === 'Video') {
+            label = t('video');
+          } else if (route.name === 'Manage') {
+            label = t('manage');
+          } else if (route.name === 'Settings') {
+            label = t('settings');
+          } else if (route.name === 'SupportTickets') {
+            label = t('supportTickets');
+          }
+
+          return <Text style={{ color, fontSize: 10 }}>{label}</Text>;
+        }
       })}
     >
-      <Tab.Screen name="Video" component={VideoScreen} options={{ headerShown: false, tabBarLabel: t('video') }} />
-      <Tab.Screen name="Manage" component={VideoManagementScreen} options={{ headerShown: false, tabBarLabel: t('manage') }} />
-      <Tab.Screen name="SupportTickets" component={SupportTicketsScreen} options={{ headerShown: false, tabBarLabel: t('supportTickets') }} />
-      <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false, tabBarLabel: t('settings') }} />
+      <Tab.Screen name="Video" component={VideoScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Manage" component={VideoManagementScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="SupportTickets" component={SupportTicketsScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 };

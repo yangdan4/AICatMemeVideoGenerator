@@ -4,6 +4,7 @@ import { Text, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
+import { fetchWithToken } from './api';
 
 export default function SupportTicketsScreen({ navigation }) {
   const { t } = useTranslation();
@@ -18,7 +19,7 @@ export default function SupportTicketsScreen({ navigation }) {
 
   const fetchTickets = async () => {
     try {
-      const response = await fetch(`http://${serverHost}:${serverPort}/get_support_tickets?username=${user.email}`);
+      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_support_tickets?username=${user.email}`);
       const data = await response.json();
 
       if (response.ok) {

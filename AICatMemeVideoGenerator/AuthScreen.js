@@ -1,10 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextInput, Button, Snackbar, IconButton } from 'react-native-paper';
 import { Text } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
+import DeviceInfo from 'react-native-device-info';
+import { serverHost, serverPort } from './consts';
+import {apiKey} from './frontend_secret_key';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AuthScreen() {
   const { t } = useTranslation();
@@ -14,10 +18,25 @@ export default function AuthScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [deviceId, setDeviceId] = useState(null);
+
+  useEffect(() => {
+    DeviceInfo.getUniqueId().then(id => {
+      setDeviceId(id);
+    });
+  }, []);
 
   const showSnackbar = (message) => {
     setSnackbarMessage(message);
     setSnackbarVisible(true);
+  };
+
+  const saveToken = async (token) => {
+    try {
+      await AsyncStorage.setItem('userToken', token);
+    } catch (error) {
+      console.error("Error saving token", error);
+    }
   };
 
   const handleLogin = () => {
@@ -27,9 +46,22 @@ export default function AuthScreen() {
     }
 
     auth().signInWithEmailAndPassword(email, password)
-      .then(userCredential => {
+      .then(async userCredential => {
         setUser(userCredential.user);
         showSnackbar(t('loginSuccessful'));
+        const response = await fetch(`http://${serverHost}:${serverPort}/get_token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username: email, device_id: deviceId, app_key: apiKey })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          await saveToken(data.token);
+        } else {
+          showSnackbar('Failed to get token');
+        }
       })
       .catch(error => {
         showSnackbar(error.message);
@@ -43,9 +75,22 @@ export default function AuthScreen() {
     }
 
     auth().createUserWithEmailAndPassword(email, password)
-      .then(userCredential => {
+      .then(async userCredential => {
         setUser(userCredential.user);
         showSnackbar(t('registrationSuccessful'));
+        const response = await fetch(`http://${serverHost}:${serverPort}/get_token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username: email, device_id: deviceId, app_key: frontend_secret_key })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          await saveToken(data.token);
+        } else {
+          showSnackbar('Failed to get token');
+        }
       })
       .catch(error => {
         showSnackbar(error.message);
