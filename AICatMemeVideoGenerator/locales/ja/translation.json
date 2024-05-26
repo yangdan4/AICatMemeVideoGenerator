@@ -41,5 +41,6 @@
   "status": "ステータス",
   "failedToFetchTickets": "サポートチケットの取得に失敗しました",
   "ongoing": "進行中",
-  "resolved": "解決済み"
+  "resolved": "解決済み",
+  "videoProcessingCompleted": "ビデオ処理が完了しました"
 }

@@ -41,5 +41,6 @@
   "status": "狀態",
   "failedToFetchTickets": "獲取工单失敗",
   "ongoing": "進行中",
-  "resolved": "已解決"
+  "resolved": "已解決",
+  "videoProcessingCompleted": "影片处理完成"
 }

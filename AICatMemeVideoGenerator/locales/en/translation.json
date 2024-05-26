@@ -41,5 +41,6 @@
   "status": "Status",
   "failedToFetchTickets": "Failed to fetch support tickets",
   "ongoing": "Ongoing",
-  "resolved": "Resolved"
+  "resolved": "Resolved",
+  "videoProcessingCompleted": "Video processing completed"
 }

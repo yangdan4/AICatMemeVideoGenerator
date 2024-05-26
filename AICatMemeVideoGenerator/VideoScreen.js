@@ -11,7 +11,7 @@ import { serverHost, serverPort } from './consts';
 import { fetchWithToken } from './api';
 
 export default function VideoScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [input, setInput] = useState('');
   const [videos, setVideos] = useState([]);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -20,15 +20,31 @@ export default function VideoScreen({ navigation }) {
   const { setUser } = useContext(AuthContext);
   const { addVideo } = useContext(VideoContext);
 
+  const getLanguage = () => {
+    const language = i18n.language;
+    switch (language) {
+      case 'zh':
+        return 'Simplified Chinese';
+      case 'zh-TW':
+        return 'Traditional Chinese';
+      case 'ja':
+        return 'Japanese';
+      case 'en':
+      default:
+        return 'English';
+    }
+  };
+
   const sendVideoPrompt = async () => {
     setIsSending(true);
     try {
+      const language = getLanguage();
       const response = await fetchWithToken(`http://${serverHost}:${serverPort}/create_content`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: input }),
+        body: JSON.stringify({ prompt: input, language: language }),
       });
 
       if (!response.ok) {
