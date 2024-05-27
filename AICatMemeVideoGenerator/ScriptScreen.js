@@ -155,6 +155,37 @@ const ScriptScreen = ({ navigation }) => {
     }
   };
 
+  const createManualScript = () => {
+    if (!scriptName) {
+      setSnackbarMessage(t('enterScriptName'));
+      setSnackbarVisible(true);
+      return;
+    }
+
+    const newScript = {
+      script_name: scriptName,
+      prompt: '',
+      script: {
+        scenes: [
+          {
+            scene_index: 1,
+            location: '',
+            characters: [
+              { identity: '', action: '', words: '', enter: '', time: '', exit: '' }
+            ]
+          }
+        ]
+      }
+    };
+
+    setScripts([newScript, ...scripts]);
+    setFilteredScripts([newScript, ...scripts]);
+    setCurrentScript(newScript);
+    setIsScriptCardVisible(false);
+    setScriptName('');
+    setPrompt('');
+  };
+
   const handleSaveScript = async () => {
     if (!currentScript) return;
 
@@ -521,6 +552,9 @@ const ScriptScreen = ({ navigation }) => {
             />
             <Button mode="contained" onPress={generateScript} style={styles.button} disabled={isSending}>
               {t('generateScript')}
+            </Button>
+            <Button mode="contained" onPress={createManualScript} style={styles.button} disabled={isSending}>
+              {t('createManualScript')}
             </Button>
           </Card.Content>
         </Animated.View>

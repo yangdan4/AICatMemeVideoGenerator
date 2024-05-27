@@ -70,5 +70,6 @@
   "confirmSaveScript": "Save Script",
   "location": "Location",
   "action": "Action",
-  "pleaseFillAllFields": "Please fill all fields and make sure all time fields follow mm:ss"
+  "pleaseFillAllFields": "Please fill all fields and make sure all time fields follow mm:ss",
+  "createManualScript": "Create Manual Script"
 }

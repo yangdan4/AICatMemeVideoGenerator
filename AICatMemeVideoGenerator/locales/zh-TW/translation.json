@@ -64,5 +64,6 @@
   "confirmSaveScript": "確認保存劇本",
   "location": "位置",
   "action": "動作",
-  "pleaseFillAllFields": "請填寫所有資訊還有確認時間格式為mm:ss"
+  "pleaseFillAllFields": "請填寫所有資訊還有確認時間格式為mm:ss",
+  "createManualScript": "手動創建劇本"
 }
