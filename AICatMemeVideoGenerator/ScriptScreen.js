@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity } from 'react-native';
 import { TextInput, Button, Text, Card, Snackbar, Searchbar, Dialog, Portal, FAB, IconButton } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -28,6 +28,7 @@ const ScriptScreen = ({ navigation }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [paginatedScripts, setPaginatedScripts] = useState([]);
   const [isScriptCardVisible, setIsScriptCardVisible] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -74,6 +75,7 @@ const ScriptScreen = ({ navigation }) => {
       console.error('Error fetching scripts:', error);
     }
   };
+
   const fetchPresets = async () => {
     try {
       const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_presets`, {
@@ -152,16 +154,17 @@ const ScriptScreen = ({ navigation }) => {
       setIsSending(false);
     }
   };
+
   const handleSaveScript = async () => {
     if (!currentScript) return;
-  
+
     const isValid = validateScript(currentScript.script);
     if (!isValid) {
       setSnackbarMessage(t('pleaseFillAllFields'));
       setSnackbarVisible(true);
       return;
     }
-  
+
     try {
       await fetchWithToken(`http://${serverHost}:${serverPort}/update_script`, {
         method: 'POST',
@@ -176,14 +179,14 @@ const ScriptScreen = ({ navigation }) => {
       setSnackbarMessage(t('scriptSavedSuccessfully'));
       setSnackbarVisible(true);
       fetchAllScripts();
-      setCurrentScript(null);
+      setEditMode(false);
     } catch (error) {
       console.error('Error saving script:', error);
       setSnackbarMessage(t('errorSavingScript'));
       setSnackbarVisible(true);
     }
   };
-  
+
   const validateScript = (script) => {
     for (const scene of script.scenes) {
       if (!scene.location || !scene.scene_index || isNaN(scene.scene_index) || scene.scene_index <= 0) {
@@ -200,7 +203,7 @@ const ScriptScreen = ({ navigation }) => {
     }
     return true;
   };
-  
+
   const isValidTimeFormat = (time) => {
     const regex = /^([0-5][0-9]):([0-5][0-9])$/;
     return regex.test(time);
@@ -293,7 +296,7 @@ const ScriptScreen = ({ navigation }) => {
 
   const handleSceneChange = (value, sceneIndex, field) => {
     const newScenes = [...currentScript.script.scenes];
-    newScenes[sceneIndex - 1][field] = value;
+    newScenes.find((scene) => scene.scene_index === sceneIndex)[field] = value;
     setCurrentScript(prevScript => ({
       ...prevScript,
       script: {
@@ -305,7 +308,7 @@ const ScriptScreen = ({ navigation }) => {
 
   const handleCharacterChange = (value, sceneIndex, characterIndex, field) => {
     const newScenes = [...currentScript.script.scenes];
-    newScenes[sceneIndex - 1].characters[characterIndex][field] = value;
+    newScenes.find((scene) => scene.scene_index === sceneIndex).characters[characterIndex][field] = value;
     setCurrentScript(prevScript => ({
       ...prevScript,
       script: {
@@ -318,7 +321,7 @@ const ScriptScreen = ({ navigation }) => {
   const handleAddCharacter = (sceneIndex) => {
     const newCharacter = { identity: '', action: '', words: '', enter: '', time: '', exit: '' };
     const newScenes = [...currentScript.script.scenes];
-    newScenes[sceneIndex - 1].characters.push(newCharacter);
+    newScenes.find((scene) => scene.scene_index === sceneIndex).characters.push(newCharacter);
     setCurrentScript(prevScript => ({
       ...prevScript,
       script: {
@@ -330,8 +333,8 @@ const ScriptScreen = ({ navigation }) => {
 
   const handleRemoveCharacter = (sceneIndex, characterIndex) => {
     const newScenes = [...currentScript.script.scenes];
-    if (newScenes[sceneIndex - 1].characters.length > 1) {
-      newScenes[sceneIndex - 1].characters.splice(characterIndex, 1);
+    if (newScenes.find((scene) => scene.scene_index === sceneIndex).characters.length > 1) {
+      newScenes.find((scene) => scene.scene_index === sceneIndex).characters.splice(characterIndex, 1);
       setCurrentScript(prevScript => ({
         ...prevScript,
         script: {
@@ -343,7 +346,7 @@ const ScriptScreen = ({ navigation }) => {
   };
 
   const handleAddScene = () => {
-    const newScene = { scene_index: currentScript.script.scenes.length + 1, location: '', characters: [] };
+    const newScene = { scene_index: currentScript.script.scenes.length + 1, location: '', characters: [{ identity: '', action: '', words: '', enter: '', time: '', exit: '' }] };
     const newScenes = [...currentScript.script.scenes];
     newScenes.push(newScene);
     setCurrentScript(prevScript => ({
@@ -356,9 +359,8 @@ const ScriptScreen = ({ navigation }) => {
   };
 
   const handleRemoveScene = (sceneIndex) => {
-    const newScenes = [...currentScript.script.scenes];
-    if (newScenes.length > 1) {
-      newScenes.splice(sceneIndex - 1, 1);
+    const newScenes = currentScript.script.scenes.filter(scene => scene.scene_index !== sceneIndex);
+    if (newScenes.length < currentScript.script.scenes.length) {
       setCurrentScript(prevScript => ({
         ...prevScript,
         script: {
@@ -368,6 +370,121 @@ const ScriptScreen = ({ navigation }) => {
       }));
     }
   };
+
+  const renderScriptCard = useCallback(
+    ({ item }) => (
+      <Card style={styles.scriptCard}>
+        <Card.Content>
+          <Text style={styles.titleText}>{item.script_name}</Text>
+          <Text style={styles.messageText}>{item.prompt}</Text>
+          {currentScript && editMode && currentScript.script_name === item.script_name ? (
+            <ScrollView style={styles.scrollView}>
+              {currentScript.script.scenes.map((scene) => (
+                <View key={scene.scene_index} style={styles.sceneContainer}>
+                  {scene.scene_index > 1 && (
+                    <TouchableOpacity
+                      style={styles.removeButton}
+                      onPress={() => handleRemoveScene(scene.scene_index)}
+                    >
+                      <IconButton icon="close" size={20} />
+                    </TouchableOpacity>
+                  )}
+                  <TextInput
+                    style={styles.input}
+                    label={t('Scene Index')}
+                    value={String(scene.scene_index)}
+                    editable={false}
+                  />
+                  <DropDownPicker
+                    searchable
+                    listMode="MODAL"
+                    searchPlaceholder={t('location')}
+                    open={locationOpen}
+                    value={scene.location}
+                    showTickIcon={false}
+                    items={locationItems}
+                    setOpen={setLocationOpen}
+                    onSelectItem={(item) => handleSceneChange(item.value, scene.scene_index, 'location')}
+                    setItems={setLocationItems}
+                    placeholder={t('location')}
+                    containerStyle={styles.pickerContainer}
+                    textStyle={styles.pickerInput}
+                  />
+                  {scene.characters.map((character, characterIndex) => (
+                    <View key={characterIndex} style={styles.characterContainer}>
+                      {characterIndex > 0 && (
+                        <TouchableOpacity
+                          style={styles.removeButton}
+                          onPress={() => handleRemoveCharacter(scene.scene_index, characterIndex)}
+                        >
+                          <IconButton icon="close" size={20} />
+                        </TouchableOpacity>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        label={t('Identity')}
+                        value={character.identity}
+                        onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'identity')}
+                      />
+                      <DropDownPicker
+                        searchable
+                        listMode="MODAL"
+                        searchPlaceholder={t('action')}
+                        open={actionOpen}
+                        value={character.action}
+                        items={actionItems}
+                        showTickIcon={false}
+                        setOpen={setActionOpen}
+                        onSelectItem={(item) => handleCharacterChange(item.value, scene.scene_index, characterIndex, 'action')}
+                        setItems={setActionItems}
+                        placeholder={t('action')}
+                        containerStyle={styles.pickerContainer}
+                        textStyle={styles.pickerInput}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        label={t('Words')}
+                        value={character.words}
+                        onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'words')}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        label={t('Enter Time')}
+                        value={character.enter}
+                        onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'enter')}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        label={t('Time')}
+                        value={character.time}
+                        onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'time')}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        label={t('Exit Time')}
+                        value={character.exit}
+                        onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'exit')}
+                      />
+                    </View>
+                  ))}
+                  <Button icon="plus" onPress={() => handleAddCharacter(scene.scene_index)}>{t('addCharacter')}</Button>
+                </View>
+              ))}
+              <Button style={{ marginBottom: 5 }} icon="plus" onPress={() => handleAddScene()}>{t('addScene')}</Button>
+              <Button style={{ marginBottom: 5 }} mode='outlined' onPress={handleSaveScript}>{t('saveScript')}</Button>
+            </ScrollView>
+          ) : (
+            <>
+              <Button mode='outlined' onPress={async () => { await setCurrentScript(item); setEditMode(true); }} style={styles.button}>{t('editScript')}</Button>
+              <Button mode='outlined' onPress={() => showDeleteDialog(item.script_name)} style={styles.button}>{t('deleteScript')}</Button>
+              <Button mode='outlined' onPress={async () => { await setCurrentScript(item); handleGenerateVideo(); }} disabled={isSending}>{t('generateVideo')}</Button>
+            </>
+          )}
+        </Card.Content>
+      </Card>
+    ),
+    [currentScript, editMode, isSending, locationItems, actionItems, locationOpen, actionOpen]
+  );
 
   return (
     <View style={styles.container}>
@@ -379,117 +496,7 @@ const ScriptScreen = ({ navigation }) => {
       />
       <FlatList
         data={paginatedScripts}
-        renderItem={({ item }) => (
-          <Card style={styles.scriptCard}>
-            <Card.Content>
-              <Text style={styles.titleText}>{item.script_name}</Text>
-              <Text style={styles.messageText}>{item.prompt}</Text>
-              {currentScript && currentScript.script_name === item.script_name ? (
-                <ScrollView style={styles.scrollView}>
-                  {currentScript.script.scenes.map((scene, sceneIndex) => (
-                    <View key={sceneIndex} style={styles.sceneContainer}>
-                      {sceneIndex > 0 && (
-                        <TouchableOpacity
-                          style={styles.removeButton}
-                          onPress={() => handleRemoveScene(sceneIndex)}
-                        >
-                          <IconButton icon="close" size={20} />
-                        </TouchableOpacity>
-                      )}
-                      <TextInput
-                        style={styles.input}
-                        label={t('Scene Index')}
-                        value={String(scene.scene_index)}
-                        editable={false}
-                      />
-                      <DropDownPicker
-                        searchable
-                        listMode="MODAL"
-                        searchPlaceholder={t('location')}
-                        open={locationOpen}
-                        value={scene.location}
-                        showTickIcon={false}
-                        items={locationItems}
-                        setOpen={setLocationOpen}
-                        onSelectItem={(item) => handleSceneChange(item.value, sceneIndex, 'location')}
-                        setItems={setLocationItems}
-                        placeholder={t('location')}
-                        containerStyle={styles.pickerContainer}
-                        textStyle={styles.pickerInput}
-                      />
-                      {scene.characters.map((character, characterIndex) => (
-                        <View key={characterIndex} style={styles.characterContainer}>
-                          {characterIndex > 0 && (
-                            <TouchableOpacity
-                              style={styles.removeButton}
-                              onPress={() => handleRemoveCharacter(sceneIndex, characterIndex)}
-                            >
-                              <IconButton icon="close" size={20} />
-                            </TouchableOpacity>
-                          )}
-                          <TextInput
-                            style={styles.input}
-                            label={t('Identity')}
-                            value={character.identity}
-                            onChangeText={(value) => handleCharacterChange(value, sceneIndex, characterIndex, 'identity')}
-                          />
-                          <DropDownPicker
-                            searchable
-                            listMode="MODAL"
-                            searchPlaceholder={t('action')}
-                            open={actionOpen}
-                            value={character.action}
-                            items={actionItems}
-                            showTickIcon={false}
-                            setOpen={setActionOpen}
-                            onSelectItem={(item) => handleCharacterChange(item.value, sceneIndex, characterIndex, 'action')}
-                            setItems={setActionItems}
-                            placeholder={t('action')}
-                            containerStyle={styles.pickerContainer}
-                            textStyle={styles.pickerInput}
-                          />
-                          <TextInput
-                            style={styles.input}
-                            label={t('Words')}
-                            value={character.words}
-                            onChangeText={(value) => handleCharacterChange(value, sceneIndex, characterIndex, 'words')}
-                          />
-                          <TextInput
-                            style={styles.input}
-                            label={t('Enter Time')}
-                            value={character.enter}
-                            onChangeText={(value) => handleCharacterChange(value, sceneIndex, characterIndex, 'enter')}
-                          />
-                          <TextInput
-                            style={styles.input}
-                            label={t('Time')}
-                            value={character.time}
-                            onChangeText={(value) => handleCharacterChange(value, sceneIndex, characterIndex, 'time')}
-                          />
-                          <TextInput
-                            style={styles.input}
-                            label={t('Exit Time')}
-                            value={character.exit}
-                            onChangeText={(value) => handleCharacterChange(value, sceneIndex, characterIndex, 'exit')}
-                          />
-                        </View>
-                      ))}
-                      <Button icon="plus" onPress={() => handleAddCharacter(sceneIndex)}>{t('addCharacter')}</Button>
-                    </View>
-                  ))}
-                  <Button style={{marginBottom: 5 }} icon="plus" onPress={() => handleAddScene()}>{t('addScene')}</Button>
-                  <Button style={{marginBottom: 5 }} mode='outlined' onPress={handleSaveScript}>{t('saveScript')}</Button>
-                  <Button mode='outlined' onPress={handleGenerateVideo} disabled={isSending}>{t('generateVideo')}</Button>
-                </ScrollView>
-              ) : (
-                <>
-                  <Button style={{marginBottom: 5 }}mode='outlined' onPress={() => showDeleteDialog(item.script_name)} style={styles.button}>{t('deleteScript')}</Button>
-                  <Button mode='outlined' onPress={() => setCurrentScript(item)} style={styles.button}>{t('editScript')}</Button>
-                </>
-              )}
-            </Card.Content>
-          </Card>
-        )}
+        renderItem={renderScriptCard}
         keyExtractor={(item, index) => index.toString()}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
@@ -567,7 +574,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   button: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   card: {
     marginBottom: 16,

@@ -1,6 +1,6 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert } from 'react-native';
-import { Button, Card, Text, Searchbar } from 'react-native-paper';
+import { Button, Card, Text, Searchbar, Dialog, Portal } from 'react-native-paper';
 import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
 import { VideoContext } from './VideoContext';
@@ -18,6 +18,8 @@ export default function VideoManagementScreen() {
   const [currentPage, setCurrentPage] = useState(1);
   const [paginatedVideos, setPaginatedVideos] = useState([]);
   const isFocused = useIsFocused();
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState(null);
 
   useEffect(() => {
     if (isFocused) {
@@ -62,7 +64,7 @@ export default function VideoManagementScreen() {
         title: t('shareVideo'),
       });
     } catch (error) {
-      Alert.alert(t('error'), t('failedToShareVideo'));
+      // Alert.alert(t('error'), t('failedToShareVideo'));
     }
   };
 
@@ -71,6 +73,48 @@ export default function VideoManagementScreen() {
       setCurrentPage(currentPage + 1);
     }
   };
+
+  const showDeleteDialog = (videoPath) => {
+    setVideoToDelete(videoPath);
+    setDeleteDialogVisible(true);
+  };
+
+  const hideDeleteDialog = () => {
+    setDeleteDialogVisible(false);
+    setVideoToDelete(null);
+  };
+
+  const confirmDeleteVideo = async () => {
+    hideDeleteDialog();
+    if (videoToDelete) {
+      deleteVideo(videoToDelete);
+    }
+  };
+
+  const renderVideoCard = useCallback(
+    ({ item }) => (
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text>{item.split('/').pop()}</Text>
+          <Video
+            source={{ uri: `file://${item}` }}
+            style={styles.video}
+            controls={true}
+            paused={true}
+          />
+          <View style={styles.buttonGroup}>
+            <Button mode="contained" onPress={() => showDeleteDialog(item)} style={{ marginRight: 10 }}>
+              {t('delete')}
+            </Button>
+            <Button mode="contained" onPress={() => shareVideo(item)}>
+              {t('share')}
+            </Button>
+          </View>
+        </Card.Content>
+      </Card>
+    ),
+    []
+  );
 
   return (
     <View style={styles.container}>
@@ -82,31 +126,24 @@ export default function VideoManagementScreen() {
       />
       <FlatList
         data={paginatedVideos}
-        renderItem={({ item }) => (
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text>{item.split('/').pop()}</Text>
-              <Video
-                source={{ uri: `file://${item}` }}
-                style={styles.video}
-                controls={true}
-                paused={true}
-              />
-              <View style={styles.buttonGroup}>
-                <Button mode="contained" onPress={() => deleteVideo(item)} style={{ marginRight: 10 }}>
-                  {t('delete')}
-                </Button>
-                <Button mode="contained" onPress={() => shareVideo(item)}>
-                  {t('share')}
-                </Button>
-              </View>
-            </Card.Content>
-          </Card>
-        )}
+        renderItem={renderVideoCard}
         keyExtractor={(item, index) => index.toString()}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
       />
+
+      <Portal>
+        <Dialog visible={deleteDialogVisible} onDismiss={hideDeleteDialog}>
+          <Dialog.Title>{t('confirmDelete')}</Dialog.Title>
+          <Dialog.Content>
+            <Text>{t('areYouSureDelete')}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={hideDeleteDialog}>{t('cancel')}</Button>
+            <Button onPress={confirmDeleteVideo}>{t('delete')}</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }

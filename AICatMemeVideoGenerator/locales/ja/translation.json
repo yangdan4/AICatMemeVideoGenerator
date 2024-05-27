@@ -70,5 +70,5 @@
   "confirmSaveScript": "スクリプトの保存を確認",
   "location": "場所",
   "action": "アクション",
-  "pleaseFillAllFields": "すべてのフィールドに記入してください"
+  "pleaseFillAllFields": "すべてのフィールドに記入してください。また、すべての時間フィールドが mm:ssの形式に従っていることを確認してください。"
 }
