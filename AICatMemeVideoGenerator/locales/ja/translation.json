@@ -71,5 +71,11 @@
   "location": "場所",
   "action": "アクション",
   "pleaseFillAllFields": "すべてのフィールドに記入してください。また、すべての時間フィールドが mm:ssの形式に従っていることを確認してください。",
-  "createManualScript": "手動脚本を作成"
+  "pleaseValidLocation": "AI の提案に基づいて、ドロップダウンリストから同様の場所を選択してください",
+  "pleaseValidAction": "AI の提案に基づいて、ドロップダウンリストから同様のアクションを選択してください",
+  "PleaseValidTime": "すべての時間フィールドが mm:ss の形式に従っていることを確認してください",
+  "createManualScript": "手動脚本を作成",
+  "prevPage": "前のページ",
+  "page": "ページ",
+  "nextPage": "次のページ"
 }

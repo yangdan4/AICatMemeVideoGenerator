@@ -68,7 +68,13 @@ export default function VideoManagementScreen() {
     }
   };
 
-  const handleLoadMore = () => {
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
     if ((currentPage * PAGE_SIZE) < filteredVideos.length) {
       setCurrentPage(currentPage + 1);
     }
@@ -128,9 +134,13 @@ export default function VideoManagementScreen() {
         data={paginatedVideos}
         renderItem={renderVideoCard}
         keyExtractor={(item, index) => index.toString()}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
       />
+
+      <View style={styles.paginationContainer}>
+        <Button onPress={handlePrevPage} disabled={currentPage === 1}>{t('prevPage')}</Button>
+        <Text>{`${t('page')} ${currentPage}`}</Text>
+        <Button onPress={handleNextPage} disabled={(currentPage * PAGE_SIZE) >= filteredVideos.length}>{t('nextPage')}</Button>
+      </View>
 
       <Portal>
         <Dialog visible={deleteDialogVisible} onDismiss={hideDeleteDialog}>
@@ -169,5 +179,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: 16,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 16,
   },
 });

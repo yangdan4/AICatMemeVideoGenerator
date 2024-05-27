@@ -70,6 +70,12 @@
   "confirmSaveScript": "Save Script",
   "location": "Location",
   "action": "Action",
-  "pleaseFillAllFields": "Please fill all fields and make sure all time fields follow mm:ss",
-  "createManualScript": "Create Manual Script"
+  "pleaseFillAllFields": "Please fill all fields in the script",
+  "pleaseValidLocation": "Please choose a similar location from the dropdown list based on AI suggestion",
+  "pleaseValidAction": "Please choose a similar action from the dropdown list based on AI suggestion",
+  "PleaseValidTime": "Please make sure all time fields follow mm:ss",
+  "createManualScript": "Create Manual Script",
+  "prevPage": "Previous Page",
+  "page": "Page",
+  "nextPage": "Next Page"
 }

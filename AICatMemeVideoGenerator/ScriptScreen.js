@@ -1,14 +1,48 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity } from 'react-native';
-import { TextInput, Button, Text, Card, Snackbar, Searchbar, Dialog, Portal, FAB, IconButton } from 'react-native-paper';
-import DropDownPicker from 'react-native-dropdown-picker';
+import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity, Modal } from 'react-native';
+import { TextInput, Button, Text, Card, Snackbar, Searchbar, Dialog, Portal, FAB, IconButton, List } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { VideoContext } from './VideoContext';
 import { serverHost, serverPort } from './consts';
 import { fetchWithToken } from './api';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 1;
+
+const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder }) => {
+  const { t, i18n } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredItems = items.filter(item => 
+    item.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <Modal visible={visible} onRequestClose={onClose} animationType="slide">
+      <View style={styles.modalContainer}>
+        <Searchbar
+          placeholder={placeholder}
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+        />
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <List.Item
+              title={item.label}
+              onPress={() => {
+                onSelectItem(item);
+                onClose();
+              }}
+            />
+          )}
+        />
+        <Button onPress={onClose}>{t('close')}</Button>
+      </View>
+    </Modal>
+  );
+};
 
 const ScriptScreen = ({ navigation }) => {
   const { t, i18n } = useTranslation();
@@ -17,6 +51,8 @@ const ScriptScreen = ({ navigation }) => {
   const [scripts, setScripts] = useState([]);
   const [filteredScripts, setFilteredScripts] = useState([]);
   const [currentScript, setCurrentScript] = useState(null);
+  const [currentSceneIndex, setCurrentSceneIndex] = useState(null);
+  const [currentCharacterIndex, setCurrentCharacterIndex] = useState(null);
   const [actions, setActions] = useState([]);
   const [locations, setLocations] = useState([]);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -35,8 +71,9 @@ const ScriptScreen = ({ navigation }) => {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [scriptToDelete, setScriptToDelete] = useState(null);
 
-  const [locationOpen, setLocationOpen] = useState(false);
-  const [actionOpen, setActionOpen] = useState(false);
+  const [locationModalVisible, setLocationModalVisible] = useState(false);
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+
   const [locationItems, setLocationItems] = useState([]);
   const [actionItems, setActionItems] = useState([]);
 
@@ -143,8 +180,8 @@ const ScriptScreen = ({ navigation }) => {
       }
 
       const responseJson = await response.json();
-      setScripts([responseJson.script, ...scripts]);
-      setFilteredScripts([responseJson.script, ...scripts]);
+      setScripts([responseJson, ...scripts]);
+      setFilteredScripts([responseJson, ...scripts]);
       setCurrentScript(responseJson);
     } catch (error) {
       console.error("Error in generateScript:", error);
@@ -189,9 +226,9 @@ const ScriptScreen = ({ navigation }) => {
   const handleSaveScript = async () => {
     if (!currentScript) return;
 
-    const isValid = validateScript(currentScript.script);
-    if (!isValid) {
-      setSnackbarMessage(t('pleaseFillAllFields'));
+    const validationMessage = validateScript(currentScript.script);
+    if (validationMessage) {
+      setSnackbarMessage(validationMessage);
       setSnackbarVisible(true);
       return;
     }
@@ -221,14 +258,20 @@ const ScriptScreen = ({ navigation }) => {
   const validateScript = (script) => {
     for (const scene of script.scenes) {
       if (!scene.location || !scene.scene_index || isNaN(scene.scene_index) || scene.scene_index <= 0) {
-        return false;
+        return t('pleaseFillAllFields');
+      }
+      else if (scene.location && !!locations.includes(scene.location)) {
+        return t('pleaseValidLocation');
       }
       for (const character of scene.characters) {
         if (!character.identity || !character.action || !character.words || !character.enter || !character.time || !character.exit) {
-          return false;
+          return t('pleaseFillAllFields');
+        }
+        else if (character.action && !!actions.includes(character.action)) {
+          return t('pleaseValidAction');
         }
         if (!isValidTimeFormat(character.enter) || !isValidTimeFormat(character.time) || !isValidTimeFormat(character.exit)) {
-          return false;
+          return t('pleaseValidTime');
         }
       }
     }
@@ -305,7 +348,13 @@ const ScriptScreen = ({ navigation }) => {
     setPaginatedScripts(filteredScripts.slice(startIndex, endIndex));
   };
 
-  const handleLoadMore = () => {
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
     if ((currentPage * PAGE_SIZE) < filteredScripts.length) {
       setCurrentPage(currentPage + 1);
     }
@@ -389,18 +438,6 @@ const ScriptScreen = ({ navigation }) => {
     }));
   };
 
-  const handleRemoveScene = (sceneIndex) => {
-    const newScenes = currentScript.script.scenes.filter(scene => scene.scene_index !== sceneIndex);
-    if (newScenes.length < currentScript.script.scenes.length) {
-      setCurrentScript(prevScript => ({
-        ...prevScript,
-        script: {
-          ...prevScript.script,
-          scenes: newScenes,
-        },
-      }));
-    }
-  };
 
   const renderScriptCard = useCallback(
     ({ item }) => (
@@ -426,21 +463,14 @@ const ScriptScreen = ({ navigation }) => {
                     value={String(scene.scene_index)}
                     editable={false}
                   />
-                  <DropDownPicker
-                    searchable
-                    listMode="MODAL"
-                    searchPlaceholder={t('location')}
-                    open={locationOpen}
-                    value={scene.location}
-                    showTickIcon={false}
-                    items={locationItems}
-                    setOpen={setLocationOpen}
-                    onSelectItem={(item) => handleSceneChange(item.value, scene.scene_index, 'location')}
-                    setItems={setLocationItems}
-                    placeholder={t('location')}
-                    containerStyle={styles.pickerContainer}
-                    textStyle={styles.pickerInput}
-                  />
+                  <TouchableOpacity onPress={() => {setLocationModalVisible(true); setCurrentSceneIndex(scene.scene_index); setCurrentCharacterIndex(null);}}>
+                    <TextInput
+                      style={styles.input}
+                      label={ t('location')}
+                      value={scene.location && !locations.includes(scene.location) ? `${scene.location} ${t('(Suggested)')}` : scene.location}
+                      editable={false}
+                    />
+                  </TouchableOpacity>
                   {scene.characters.map((character, characterIndex) => (
                     <View key={characterIndex} style={styles.characterContainer}>
                       {characterIndex > 0 && (
@@ -457,21 +487,14 @@ const ScriptScreen = ({ navigation }) => {
                         value={character.identity}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'identity')}
                       />
-                      <DropDownPicker
-                        searchable
-                        listMode="MODAL"
-                        searchPlaceholder={t('action')}
-                        open={actionOpen}
-                        value={character.action}
-                        items={actionItems}
-                        showTickIcon={false}
-                        setOpen={setActionOpen}
-                        onSelectItem={(item) => handleCharacterChange(item.value, scene.scene_index, characterIndex, 'action')}
-                        setItems={setActionItems}
-                        placeholder={t('action')}
-                        containerStyle={styles.pickerContainer}
-                        textStyle={styles.pickerInput}
-                      />
+                      <TouchableOpacity onPress={() => {setActionModalVisible(true); setCurrentSceneIndex(scene.scene_index); setCurrentCharacterIndex(characterIndex);}}>
+                        <TextInput
+                          style={styles.input}
+                          label={ t('action')}
+                          value={character.action && !actions.includes(character.action) ? `${character.action} ${t('(Suggested)')}` : character.action}
+                          editable={false}
+                        />
+                      </TouchableOpacity>
                       <TextInput
                         style={styles.input}
                         label={t('Words')}
@@ -514,8 +537,20 @@ const ScriptScreen = ({ navigation }) => {
         </Card.Content>
       </Card>
     ),
-    [currentScript, editMode, isSending, locationItems, actionItems, locationOpen, actionOpen]
+    [currentScript, editMode, isSending, locationItems, actionItems]
   );
+
+  const handleRemoveScene = (sceneIndex) => {
+    const newScenes = currentScript.script.scenes.filter(scene => scene.scene_index !== sceneIndex);
+    if (newScenes.length < currentScript.script.scenes.length){
+      setCurrentScript(prevScript => ({
+        ...prevScript,
+        script: {
+          ...prevScript.script,
+          scenes: newScenes,
+        }}))
+      }
+    };
 
   return (
     <View style={styles.container}>
@@ -529,9 +564,13 @@ const ScriptScreen = ({ navigation }) => {
         data={paginatedScripts}
         renderItem={renderScriptCard}
         keyExtractor={(item, index) => index.toString()}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
       />
+
+      <View style={styles.paginationContainer}>
+        <Button onPress={handlePrevPage} disabled={currentPage === 1}>{t('prevPage')}</Button>
+        <Text>{`${t('page')} ${currentPage}`}</Text>
+        <Button onPress={handleNextPage} disabled={(currentPage * PAGE_SIZE) >= filteredScripts.length}>{t('nextPage')}</Button>
+      </View>
 
       {isScriptCardVisible && (
         <Animated.View style={[styles.animatedCard, { opacity: cardOpacity }]}>
@@ -587,6 +626,21 @@ const ScriptScreen = ({ navigation }) => {
       >
         {snackbarMessage}
       </Snackbar>
+      <SearchModal
+        visible={locationModalVisible}
+        onClose={() => setLocationModalVisible(false)}
+        items={locationItems}
+        onSelectItem={(item) => handleSceneChange(item.value, currentSceneIndex, 'location')}
+        placeholder={t('searchLocation')}
+      />
+
+      <SearchModal
+        visible={actionModalVisible}
+        onClose={() => setActionModalVisible(false)}
+        items={actionItems}
+        onSelectItem={(item) => handleCharacterChange(item.value, currentSceneIndex, currentCharacterIndex, 'action')}
+        placeholder={t('searchAction')}
+      />
     </View>
   );
 };
@@ -638,7 +692,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     margin: 16,
     right: 0,
-    bottom: 0,
+    top: 0,
   },
   pickerContainer: {
     marginBottom: 16,
@@ -649,6 +703,17 @@ const styles = StyleSheet.create({
   },
   scrollView: {},
   removeButton: {
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
   },
 });
 

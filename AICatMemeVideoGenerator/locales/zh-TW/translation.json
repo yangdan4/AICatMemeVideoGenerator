@@ -65,5 +65,11 @@
   "location": "位置",
   "action": "動作",
   "pleaseFillAllFields": "請填寫所有資訊還有確認時間格式為mm:ss",
-  "createManualScript": "手動創建劇本"
+  "pleaseValidLocation": "請根據 AI 建議從下拉列表中選擇一個類似的位置",
+  "pleaseValidAction": "請根據 AI 建議從下拉列表中選擇一個類似的動作",
+  "PleaseValidTime": "請確保所有時間遵循 mm:ss 格式",
+  "createManualScript": "手動創建劇本",
+  "prevPage": "上一頁",
+  "page": "頁",
+  "nextPage": "下一頁"
 }

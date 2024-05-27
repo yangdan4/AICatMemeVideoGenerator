@@ -70,5 +70,12 @@
   "confirmSaveScript": "确认保存剧本",
   "location": "位置",
   "action": "动作",
-  "pleaseFillAllFields": "请填写所有信息"
+  "pleaseFillAllFields": "请填写所有信息",
+  "pleaseValidLocation": "请根据 AI 建议从下拉列表中选择一个类似的场所",
+  "pleaseValidAction": "请根据 AI 建议从下拉列表中选择一个类似的动作",
+  "PleaseValidTime": "请确保所有时间遵循 mm:ss 格式",
+  "createManualScript": "手动创建剧本",
+  "prevPage": "上一页",
+  "page": "页",
+  "nextPage": "下一页"
 }
