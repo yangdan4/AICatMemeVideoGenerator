@@ -4,7 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider, Text } from 'react-native-paper';
 import AuthScreen from './AuthScreen';
-import VideoScreen from './VideoScreen';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n'; // Import the i18n configuration
 import { AuthProvider, AuthContext } from './AuthContext';
@@ -20,6 +19,7 @@ import BugReportScreen from './BugReportScreen';
 import HeaderWithBugReport from './HeaderWithBugReport';
 import SupportTicketsScreen from './SupportTicketsScreen';
 import TicketDetailScreen from './TicketDetailsScreen';
+import ScriptScreen from './ScriptScreen';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -37,7 +37,6 @@ const app = initializeApp(firebaseConfig);
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-
 const HomeTabs = () => {
   const { t } = useTranslation();
 
@@ -47,14 +46,14 @@ const HomeTabs = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          if (route.name === 'Video') {
-            iconName = 'film';
-          } else if (route.name === 'Manage') {
+          if (route.name === 'Manage') {
             iconName = 'file-video';
           } else if (route.name === 'Settings') {
             iconName = 'account-settings';
           } else if (route.name === 'SupportTickets') {
             iconName = 'message';
+          } else if (route.name === 'ScriptEditor') {
+            iconName = 'script';
           }
 
           return <Icon name={iconName} size={size} color={color} />;
@@ -62,21 +61,21 @@ const HomeTabs = () => {
         tabBarLabel: ({ color }) => {
           let label;
 
-          if (route.name === 'Video') {
-            label = t('video');
-          } else if (route.name === 'Manage') {
+          if (route.name === 'Manage') {
             label = t('manage');
           } else if (route.name === 'Settings') {
             label = t('settings');
           } else if (route.name === 'SupportTickets') {
             label = t('supportTickets');
+          } else if (route.name === 'ScriptEditor') {
+            label = t('script');
           }
 
           return <Text style={{ color, fontSize: 10 }}>{label}</Text>;
         }
       })}
     >
-      <Tab.Screen name="Video" component={VideoScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="ScriptEditor" component={ScriptScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Manage" component={VideoManagementScreen} options={{ headerShown: false }} />
       <Tab.Screen name="SupportTickets" component={SupportTicketsScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
@@ -108,6 +107,11 @@ const AppNavigator = () => {
                 name="TicketDetail"
                 component={TicketDetailScreen}
                 options={{ title: t('ticketDetail') }}
+              />
+              <Stack.Screen
+                name="ScriptEditor"
+                component={ScriptScreen}
+                options={{ title: t('script') }}
               />
             </>
           ) : (

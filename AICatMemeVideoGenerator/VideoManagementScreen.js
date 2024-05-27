@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, Alert, TextInput } from 'react-native';
-import { Button, Card, Text } from 'react-native-paper';
+import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { Button, Card, Text, Searchbar } from 'react-native-paper';
 import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
 import { VideoContext } from './VideoContext';
@@ -74,11 +74,11 @@ export default function VideoManagementScreen() {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchBar}
+      <Searchbar
         placeholder={t('searchVideos')}
         value={searchQuery}
         onChangeText={handleSearch}
+        style={styles.searchbar}
       />
       <FlatList
         data={paginatedVideos}
@@ -117,12 +117,8 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#f5f5f5',
   },
-  searchBar: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
+  searchbar: {
     marginBottom: 16,
-    paddingLeft: 8,
   },
   card: {
     marginBottom: 16,
