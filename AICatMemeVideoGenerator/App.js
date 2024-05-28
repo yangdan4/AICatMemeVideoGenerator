@@ -72,7 +72,8 @@ const HomeTabs = () => {
           }
 
           return <Text style={{ color, fontSize: 10 }}>{label}</Text>;
-        }
+        },
+        tabBarStyle: {backgroundColor: '#f5f5f5'}
       })}
     >
       <Tab.Screen name="ScriptEditor" component={ScriptScreen} options={{ headerShown: false }} />
@@ -107,11 +108,6 @@ const AppNavigator = () => {
                 name="TicketDetail"
                 component={TicketDetailScreen}
                 options={{ title: t('ticketDetail') }}
-              />
-              <Stack.Screen
-                name="ScriptEditor"
-                component={ScriptScreen}
-                options={{ title: t('script') }}
               />
             </>
           ) : (

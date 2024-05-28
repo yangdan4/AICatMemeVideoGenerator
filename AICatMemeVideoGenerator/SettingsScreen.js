@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react';
-import { View, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, LayoutAnimation, Platform, UIManager, ImageBackground } from 'react-native';
 import { List, Divider } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import auth from '@react-native-firebase/auth';
+import catBackground from './cat_background.jpg';
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -46,6 +47,7 @@ export default function SettingsScreen({ navigation }) {
   };
 
   return (
+    <ImageBackground source={catBackground} style={styles.backgroundImage}>
     <View style={styles.container}>
       <List.Section>
         <List.Accordion
@@ -75,6 +77,7 @@ export default function SettingsScreen({ navigation }) {
         />
       </List.Section>
     </View>
+    </ImageBackground>
   );
 }
 
@@ -84,9 +87,15 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   accordionBanner: {
-    backgroundColor: '#f0f0f0', // Change this color as needed
+    backgroundColor: '#f5f5f5'
   },
   listItem: {
-    backgroundColor: 'transparent', // Ensure expanded items are transparent
+    backgroundColor: 'transparent'
+  },
+
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'stretch',
+    justifyContent: 'center',
   },
 });

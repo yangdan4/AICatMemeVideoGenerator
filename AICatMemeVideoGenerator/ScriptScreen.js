@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity, Modal } from 'react-native';
+import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity, Modal, ImageBackground } from 'react-native';
 import { TextInput, Button, Text, Card, Snackbar, Searchbar, Dialog, Portal, FAB, IconButton, List } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
@@ -7,8 +7,8 @@ import { VideoContext } from './VideoContext';
 import { serverHost, serverPort } from './consts';
 import { fetchWithToken } from './api';
 import RNFetchBlob from 'rn-fetch-blob';
-
-const PAGE_SIZE = 1;
+import catBackground from './cat_background.jpg';
+const PAGE_SIZE = 3;
 
 const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder }) => {
   const { t, i18n } = useTranslation();
@@ -587,6 +587,7 @@ const ScriptScreen = ({ navigation }) => {
     };
 
   return (
+      <ImageBackground source={catBackground} style={styles.backgroundImage}>
     <View style={styles.container}>
       <Searchbar
         placeholder={t('searchScripts')}
@@ -675,15 +676,19 @@ const ScriptScreen = ({ navigation }) => {
         onSelectItem={(item) => handleCharacterChange(item.value, currentSceneIndex, currentCharacterIndex, 'action')}
         placeholder={t('searchAction')}
       />
-    </View>
+      </View>
+      </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'transparent',
   },
   searchbar: {
     marginBottom: 16,
@@ -747,7 +752,12 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'stretch',
+    justifyContent: 'center',
   },
 });
 

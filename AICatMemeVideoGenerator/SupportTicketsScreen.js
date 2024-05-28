@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { Text, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
 import { fetchWithToken } from './api';
+import catBackground from './cat_background.jpg';
 
 export default function SupportTicketsScreen({ navigation }) {
   const { t } = useTranslation();
   const [tickets, setTickets] = useState([]);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const { user } = useContext(AuthContext);
+  const { user, sentReport } = useContext(AuthContext);
 
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [sentReport]);
 
   const fetchTickets = async () => {
     try {
@@ -34,6 +35,7 @@ export default function SupportTicketsScreen({ navigation }) {
   };
 
   return (
+    <ImageBackground source={catBackground} style={styles.backgroundImage}>
     <View style={styles.container}>
       <FlatList
         data={tickets}
@@ -58,6 +60,7 @@ export default function SupportTicketsScreen({ navigation }) {
         {snackbarMessage}
       </Snackbar>
     </View>
+    </ImageBackground>
   );
 }
 
@@ -65,7 +68,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   card: {
     marginBottom: 16,
@@ -76,5 +78,11 @@ const styles = StyleSheet.create({
   },
   message: {
     marginBottom: 8,
+  },
+
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'stretch',
+    justifyContent: 'center',
   },
 });

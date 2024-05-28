@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, Alert, ImageBackground } from 'react-native';
 import { Button, Card, Text, Searchbar, Dialog, Portal } from 'react-native-paper';
 import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
@@ -7,6 +7,7 @@ import { VideoContext } from './VideoContext';
 import Video from 'react-native-video';
 import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import catBackground from './cat_background.jpg';
 
 const PAGE_SIZE = 5;
 
@@ -123,6 +124,7 @@ export default function VideoManagementScreen() {
   );
 
   return (
+    <ImageBackground source={catBackground} style={styles.backgroundImage}>
     <View style={styles.container}>
       <Searchbar
         placeholder={t('searchVideos')}
@@ -155,6 +157,7 @@ export default function VideoManagementScreen() {
         </Dialog>
       </Portal>
     </View>
+      </ImageBackground>
   );
 }
 
@@ -162,7 +165,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   searchbar: {
     marginBottom: 16,
@@ -185,5 +187,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 16,
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'stretch',
+    justifyContent: 'center',
   },
 });

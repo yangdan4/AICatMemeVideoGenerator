@@ -6,6 +6,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [sentReport, setSentReport] = useState(false);
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(setUser);
@@ -13,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, sentReport, setSentReport }}>
       {children}
     </AuthContext.Provider>
   );

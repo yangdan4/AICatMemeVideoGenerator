@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ImageBackground } from 'react-native';
 import { TextInput, Button, Snackbar, IconButton } from 'react-native-paper';
 import { Text } from 'react-native';
 import auth from '@react-native-firebase/auth';
@@ -9,6 +9,7 @@ import DeviceInfo from 'react-native-device-info';
 import { serverHost, serverPort } from './consts';
 import {apiKey} from './frontend_secret_key';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import catBackground from './cat_background.jpg';
 
 export default function AuthScreen() {
   const { t } = useTranslation();
@@ -98,6 +99,7 @@ export default function AuthScreen() {
   };
 
   return (
+    <ImageBackground source={catBackground} style={styles.backgroundImage}>
     <View style={styles.container}>
       <TextInput
         label={t('email')}
@@ -135,6 +137,7 @@ export default function AuthScreen() {
         {snackbarMessage}
       </Snackbar>
     </View>
+      </ImageBackground>
   );
 }
 
@@ -143,7 +146,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   input: {
     marginBottom: 16,
@@ -161,5 +163,11 @@ const styles = StyleSheet.create({
   },
   button: {
     marginBottom: 8,
+  },
+
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'stretch',
+    justifyContent: 'center',
   },
 });

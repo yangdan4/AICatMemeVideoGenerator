@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { View, FlatList, StyleSheet, Image, Alert, RefreshControl } from 'react-native';
+import { View, FlatList, StyleSheet, Image, Alert, RefreshControl, ImageBackground } from 'react-native';
 import { Text, TextInput, Button, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
 import { fetchWithToken } from './api';
+import catBackground from './cat_background.jpg';
 
 export default function TicketDetailScreen({ route }) {
   const { t } = useTranslation();
@@ -77,6 +78,7 @@ export default function TicketDetailScreen({ route }) {
   };
 
   return (
+    <ImageBackground source={catBackground} style={styles.backgroundImage}>
     <View style={styles.container}>
       <FlatList
         data={messages}
@@ -119,13 +121,13 @@ export default function TicketDetailScreen({ route }) {
         {snackbarMessage}
       </Snackbar>
     </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   contentContainer: {
     padding: 16,
@@ -160,5 +162,11 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 16,
     padding: 16
+  },
+
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'stretch',
+    justifyContent: 'center',
   },
 });
