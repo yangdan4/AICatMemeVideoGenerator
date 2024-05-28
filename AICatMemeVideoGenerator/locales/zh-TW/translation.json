@@ -71,5 +71,8 @@
   "createManualScript": "手動創建劇本",
   "prevPage": "上一頁",
   "page": "頁",
-  "nextPage": "下一頁"
+  "nextPage": "下一頁",
+  "scriptGenerating": "劇本正在生成...",
+  "scriptDone": "劇本生成完成",
+  "videoDone": "影片生成完成"
 }

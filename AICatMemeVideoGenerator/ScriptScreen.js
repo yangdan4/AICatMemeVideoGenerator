@@ -6,6 +6,7 @@ import { AuthContext } from './AuthContext';
 import { VideoContext } from './VideoContext';
 import { serverHost, serverPort } from './consts';
 import { fetchWithToken } from './api';
+import RNFetchBlob from 'rn-fetch-blob';
 
 const PAGE_SIZE = 1;
 
@@ -115,8 +116,13 @@ const ScriptScreen = ({ navigation }) => {
 
   const fetchPresets = async () => {
     try {
+      const language = getLanguage();
       const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_presets`, {
-        method: 'GET'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language: language}),
       });
       const responseJson = await response.json();
       setActions(responseJson.actions);
@@ -164,6 +170,8 @@ const ScriptScreen = ({ navigation }) => {
       setSnackbarVisible(true);
       return;
     }
+    setSnackbarMessage(t('scriptGenerating'));
+    setSnackbarVisible(true);
     setIsSending(true);
     try {
       const language = getLanguage();
@@ -188,6 +196,8 @@ const ScriptScreen = ({ navigation }) => {
       setSnackbarMessage(error.message);
       setSnackbarVisible(true);
     } finally {
+      setSnackbarMessage(t('scriptDone'));
+      setSnackbarVisible(true);
       setIsSending(false);
     }
   };
@@ -260,14 +270,14 @@ const ScriptScreen = ({ navigation }) => {
       if (!scene.location || !scene.scene_index || isNaN(scene.scene_index) || scene.scene_index <= 0) {
         return t('pleaseFillAllFields');
       }
-      else if (scene.location && !!locations.includes(scene.location)) {
+      else if (scene.location && !locations.includes(scene.location)) {
         return t('pleaseValidLocation');
       }
       for (const character of scene.characters) {
         if (!character.identity || !character.action || !character.words || !character.enter || !character.time || !character.exit) {
           return t('pleaseFillAllFields');
         }
-        else if (character.action && !!actions.includes(character.action)) {
+        else if (character.action && !actions.includes(character.action)) {
           return t('pleaseValidAction');
         }
         if (!isValidTimeFormat(character.enter) || !isValidTimeFormat(character.time) || !isValidTimeFormat(character.exit)) {
@@ -275,7 +285,7 @@ const ScriptScreen = ({ navigation }) => {
         }
       }
     }
-    return true;
+    return '';
   };
 
   const isValidTimeFormat = (time) => {
@@ -289,6 +299,7 @@ const ScriptScreen = ({ navigation }) => {
     setSnackbarVisible(true);
 
     try {
+      const language = getLanguage();
       const response = await fetchWithToken(`http://${serverHost}:${serverPort}/create_video`, {
         method: 'POST',
         headers: {
@@ -296,6 +307,7 @@ const ScriptScreen = ({ navigation }) => {
         },
         body: JSON.stringify({
           script: currentScript.script,
+          language: language,
         }),
       });
 
@@ -310,8 +322,30 @@ const ScriptScreen = ({ navigation }) => {
       setSnackbarMessage(t('errorGeneratingVideo'));
       setSnackbarVisible(true);
     } finally {
+      setSnackbarMessage(t('videoDone'));
+      setSnackbarVisible(true);
       setIsSending(false);
     }
+  };
+
+  const saveVideoBlob = async (response) => {
+    const { fs } = RNFetchBlob;
+    const videoDir = fs.dirs.DocumentDir;
+    const filePath = `${videoDir}/${currentScript.script_name}.mp4`;
+
+    return new Promise((resolve, reject) => {
+      response.blob().then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result.split(',')[1]; // Extract base64 data
+          RNFetchBlob.fs.writeFile(filePath, base64data, 'base64')
+            .then(() => resolve(filePath)) // Return the file path
+            .catch(reject);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }).catch(reject);
+    });
   };
 
   const handleDeleteScript = async (scriptName) => {

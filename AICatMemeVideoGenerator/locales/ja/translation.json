@@ -77,5 +77,8 @@
   "createManualScript": "手動脚本を作成",
   "prevPage": "前のページ",
   "page": "ページ",
-  "nextPage": "次のページ"
+  "nextPage": "次のページ",
+  "scriptGenerating": "脚本を生成中...",
+  "scriptDone": "脚本の生成が完了しました",
+  "videoDone": "ビデオの生成が完了しました"
 }
