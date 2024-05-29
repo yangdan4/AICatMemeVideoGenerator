@@ -74,5 +74,8 @@
   "nextPage": "下一頁",
   "scriptGenerating": "劇本正在生成...",
   "scriptDone": "劇本生成完成",
-  "videoDone": "影片生成完成"
+  "videoDone": "影片生成完成",
+  "searchLocation": "搜尋地點",
+  "close": "關閉",
+  "admin": "管理員"
 }

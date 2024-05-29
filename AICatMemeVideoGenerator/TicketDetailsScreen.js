@@ -59,7 +59,7 @@ export default function TicketDetailScreen({ route }) {
       const data = await response.json();
 
       if (response.ok) {
-        const newMessage = { sender: user.email, message, timestamp: new Date().toISOString() };
+        const newMessage = { sender: user.email === 'dannielyang1996@gmail.com' ? t('admin') : user.email, message, timestamp: new Date().toISOString() };
         setMessages(prevMessages => [...prevMessages, newMessage].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
         setMessage('');
         setSnackbarMessage(t('messageSent'));

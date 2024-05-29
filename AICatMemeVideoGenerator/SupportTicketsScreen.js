@@ -7,6 +7,8 @@ import { serverHost, serverPort } from './consts';
 import { fetchWithToken } from './api';
 import catBackground from './cat_background.jpg';
 
+import { toBlobURL, fetchFile } from "@ffmpeg/util";
+
 export default function SupportTicketsScreen({ navigation }) {
   const { t } = useTranslation();
   const [tickets, setTickets] = useState([]);

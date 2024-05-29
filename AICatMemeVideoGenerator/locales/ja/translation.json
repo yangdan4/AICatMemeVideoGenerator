@@ -80,5 +80,8 @@
   "nextPage": "次のページ",
   "scriptGenerating": "脚本を生成中...",
   "scriptDone": "脚本の生成が完了しました",
-  "videoDone": "ビデオの生成が完了しました"
+  "videoDone": "ビデオの生成が完了しました",
+  "searchLocation": "場所を検索",
+  "close": "閉じ",
+  "admin": "管理者"
 }

@@ -25,6 +25,8 @@
   "reportBug": "Report Bug",
   "logout": "Logout",
   "searchVideos": "Search videos",
+  "searchLocation": "Search locations",
+  "close": "Close",
   "delete": "Delete",
   "share": "Share",
   "success": "Success",
@@ -80,5 +82,6 @@
   "createManualScript": "Create Manual Script",
   "prevPage": "Previous Page",
   "page": "Page",
-  "nextPage": "Next Page"
+  "nextPage": "Next Page",
+  "admin": "Admin"
 }

@@ -80,5 +80,7 @@
   "nextPage": "下一页",
   "scriptGenerating": "剧本正在生成...",
   "scriptDone": "剧本生成完成",
-  "videoDone": "视频生成完成"
+  "videoDone": "视频生成完成",
+  "searchLocation": "搜索地点",
+  "close": "关闭"
 }
