@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity, Modal, ImageBackground, Dimensions } from 'react-native';
+import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity, Modal, ImageBackground, Dimensions, Image } from 'react-native';
 import { TextInput, Button, Text, Card, Snackbar, Searchbar, Dialog, Portal, FAB, IconButton, List } from 'react-native-paper';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { VideoContext } from './VideoContext';
-import { serverHost, serverPort, actionVideoDict, locationVideoDict } from './consts';
+import { serverHost, serverPort, actionVideoDict } from './consts';
 import { fetchWithToken } from './api';
 import RNFetchBlob from 'rn-fetch-blob';
 import catBackground from './cat_background.jpg';
@@ -16,10 +16,30 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLoc
   const [searchQuery, setSearchQuery] = useState('');
   const [youtubeVisible, setYoutubeVisible] = useState(false);
   const [youtubeVideoId, setYoutubeVideoId] = useState('');
+  const [picVisible, setPicVisible] = useState(false);
+  const [picUrl, setPicUrl] = useState('');
 
   const filteredItems = items.filter(item => 
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  function convertImageFileName(input) {
+    // Trim any leading or trailing whitespace
+    let trimmedInput = input.trim();
+  
+    // Check if the input ends with a number
+    let match = trimmedInput.match(/(.*?)(\d+)$/);
+    
+    if (match) {
+      // If it ends with a number, format the string and append the number
+      let base = match[1].trim().toLowerCase().replace(/\s+/g, '_');
+      return `${base}_${match[2]}`;
+    } else {
+      // If it does not end with a number, format the string and append 1
+      let base = trimmedInput.toLowerCase().replace(/\s+/g, '_');
+      return `${base}_1`;
+    }
+  }
+  
 
   const handleViewYoutube = (videoId) => {
     if (videoId) {
@@ -30,8 +50,17 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLoc
     }
   };
 
+  const handleViewPic = (url) => {
+    if (url) {
+      setPicUrl(url);
+      setPicVisible(true);
+    } else {
+      console.error('Invalid Pic URL');
+    }
+  };
+
   return (
-    <Modal visible={visible} onRequestClose={onClose} animationType="slide">
+    <Modal visible={visible} onRequestClose={onClose} animationType="fade">
       <View style={styles.modalContainer}>
         <Searchbar
           placeholder={placeholder}
@@ -45,7 +74,7 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLoc
             <List.Item
               title={t(item.label)}
               right={() => (
-                <Button onPress={() => handleViewYoutube(isLocation ? locationVideoDict[item.label] : actionVideoDict[item.label])}>
+                <Button onPress={() => isLocation ? handleViewPic(`https://min-chi.material.jp/wp-content/uploads/${convertImageFileName(item.label)}.jpg`) : handleViewYoutube(actionVideoDict[item.label])}>
                   {t('view')}
                 </Button>
               )}
@@ -59,7 +88,7 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLoc
         <Button onPress={onClose}>{t('close')}</Button>
       </View>
 
-      <Modal visible={youtubeVisible} onRequestClose={() => setYoutubeVisible(false)} animationType="slide" transparent>
+      <Modal visible={youtubeVisible} onRequestClose={() => setYoutubeVisible(false)} animationType="fade" transparent>
         <View style={styles.youtubeModalOverlay}>
           <View style={styles.youtubeModalContainer}>
             <YoutubePlayer
@@ -70,6 +99,18 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLoc
               onReady={() => console.log('YouTube video ready')}
             />
             <Button style={{width: '100%'}} onPress={() => setYoutubeVisible(false)}>{t('close')}</Button>
+          </View>
+        </View>
+      </Modal>
+      <Modal visible={picVisible} onRequestClose={() => setPicVisible(false)} animationType="fade" transparent>
+        <View style={styles.youtubeModalOverlay}>
+          <View style={styles.youtubeModalContainer}>
+            <Image
+
+              style={styles.image} // Add style to image
+              source={{uri: picUrl}}
+            />
+            <Button style={{width: '100%'}} onPress={() => setPicVisible(false)}>{t('close')}</Button>
           </View>
         </View>
       </Modal>
@@ -154,7 +195,6 @@ const ScriptScreen = ({ navigation }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ language: language}),
       });
       const responseJson = await response.json();
       setActions(responseJson.actions);
@@ -525,7 +565,7 @@ const ScriptScreen = ({ navigation }) => {
                   )}
                   <TextInput
                     style={styles.input}
-                    label={t('Scene Index')}
+                    label={t('sceneIndex')}
                     value={String(scene.scene_index)}
                     editable={false}
                   />
@@ -549,7 +589,7 @@ const ScriptScreen = ({ navigation }) => {
                       )}
                       <TextInput
                         style={styles.input}
-                        label={t('Identity')}
+                        label={t('identity')}
                         value={character.identity}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'identity')}
                       />
@@ -563,25 +603,25 @@ const ScriptScreen = ({ navigation }) => {
                       </TouchableOpacity>
                       <TextInput
                         style={styles.input}
-                        label={t('Words')}
+                        label={t('words')}
                         value={character.words}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'words')}
                       />
                       <TextInput
                         style={styles.input}
-                        label={t('Enter Time')}
+                        label={t('enterTime')}
                         value={character.enter}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'enter')}
                       />
                       <TextInput
                         style={styles.input}
-                        label={t('Time')}
+                        label={t('time')}
                         value={character.time}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'time')}
                       />
                       <TextInput
                         style={styles.input}
-                        label={t('Exit Time')}
+                        label={t('exitTime')}
                         value={character.exit}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'exit')}
                       />
@@ -799,7 +839,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // dim background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   youtubeModalContainer: {
     backgroundColor: 'white',
@@ -807,6 +847,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  image: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height / 3.7,
   },
 });
 

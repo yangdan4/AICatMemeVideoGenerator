@@ -66,6 +66,5 @@ module.exports = {
       "Being disgusted": "Fd50VvYg4Ug",
       "Being evil": "he3VPFtrRhM",
       "Being excited2": "T_cR7bgoJoI",
-    },
-    locationVideoDict: {}
+    }
   };
