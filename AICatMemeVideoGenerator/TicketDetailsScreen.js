@@ -20,7 +20,7 @@ export default function TicketDetailScreen({ route }) {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_ticket_messages?ticket_id=${ticket.ticket_id}`);
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/get_ticket_messages?ticket_id=${ticket.ticket_id}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -51,7 +51,7 @@ export default function TicketDetailScreen({ route }) {
     formData.append('message', message);
 
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/add_message`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/add_message`, {
         method: 'POST',
         body: formData,
       });

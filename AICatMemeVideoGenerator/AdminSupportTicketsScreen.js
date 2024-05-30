@@ -20,7 +20,7 @@ export default function AdminSupportTicketsScreen({ navigation }) {
 
   const fetchTickets = async () => {
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_all_support_tickets`);
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/get_all_support_tickets`);
       const data = await response.json();
 
       if (response.ok) {

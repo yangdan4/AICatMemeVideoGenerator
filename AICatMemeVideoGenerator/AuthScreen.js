@@ -54,7 +54,7 @@ export default function AuthScreen() {
       .then(async userCredential => {
         setUser(userCredential.user);
         showSnackbar(t('loginSuccessful'));
-        const response = await fetch(`http://${serverHost}:${serverPort}/get_token`, {
+        const response = await fetch(`https://${serverHost}:${serverPort}/get_token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -83,7 +83,7 @@ export default function AuthScreen() {
       .then(async userCredential => {
         setUser(userCredential.user);
         showSnackbar(t('registrationSuccessful'));
-        const response = await fetch(`http://${serverHost}:${serverPort}/get_token`, {
+        const response = await fetch(`https://${serverHost}:${serverPort}/get_token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

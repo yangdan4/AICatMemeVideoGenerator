@@ -20,7 +20,7 @@ export default function AdminTicketDetailScreen({ route, navigation }) {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_ticket_messages?ticket_id=${ticket.ticket_id}`);
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/get_ticket_messages?ticket_id=${ticket.ticket_id}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -51,7 +51,7 @@ export default function AdminTicketDetailScreen({ route, navigation }) {
     formData.append('message', message);
 
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/add_message`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/add_message`, {
         method: 'POST',
         body: formData,
       });
@@ -79,7 +79,7 @@ export default function AdminTicketDetailScreen({ route, navigation }) {
 
   const resolveTicket = async () => {
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/update_ticket_status`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/update_ticket_status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

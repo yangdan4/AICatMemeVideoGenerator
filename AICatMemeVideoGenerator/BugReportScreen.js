@@ -26,7 +26,7 @@ export default function BugReportScreen({ route, navigation }) {
     });
   
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/submit_bug_report`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/submit_bug_report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',

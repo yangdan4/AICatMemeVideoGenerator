@@ -14,6 +14,7 @@ import VideoManagementScreen from './VideoManagementScreen';
 import { VideoProvider } from './VideoContext';
 import SettingsScreen from './SettingsScreen';
 import { apiKey } from './firebase_key';
+import { apiKey as stripeKey } from './stripe_key';
 import BugReportScreen from './BugReportScreen';
 import HeaderWithBugReport from './HeaderWithBugReport';
 import SupportTicketsScreen from './SupportTicketsScreen';
@@ -211,13 +212,13 @@ const AppNavigator = () => {
 
 export default function App() {
   return (
-    <StripeProvider publishableKey="your-publishable-key">
-    <AuthProvider>
-      <PaperProvider>
-        <AppNavigator />
+    <StripeProvider publishableKey={stripeKey}>
+      <AuthProvider>
+        <PaperProvider>
+          <AppNavigator />
 
-      </PaperProvider>
-    </AuthProvider>
-      </StripeProvider>
+        </PaperProvider>
+      </AuthProvider>
+    </StripeProvider>
   );
 }

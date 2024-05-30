@@ -176,7 +176,7 @@ const ScriptScreen = ({ navigation }) => {
 
   const fetchAllScripts = async () => {
     try {
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_all_scripts`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/get_all_scripts`, {
         method: 'GET'
       });
       const responseJson = await response.json();
@@ -190,7 +190,7 @@ const ScriptScreen = ({ navigation }) => {
   const fetchPresets = async () => {
     try {
       const language = getLanguage();
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/get_presets`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/get_presets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -247,7 +247,7 @@ const ScriptScreen = ({ navigation }) => {
     setIsSending(true);
     try {
       const language = getLanguage();
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/generate_script`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/generate_script`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -316,7 +316,7 @@ const ScriptScreen = ({ navigation }) => {
     }
 
     try {
-      await fetchWithToken(`http://${serverHost}:${serverPort}/update_script`, {
+      await fetchWithToken(`https://${serverHost}:${serverPort}/update_script`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -372,7 +372,7 @@ const ScriptScreen = ({ navigation }) => {
 
     try {
       const language = getLanguage();
-      const response = await fetchWithToken(`http://${serverHost}:${serverPort}/create_video`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/create_video`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -422,7 +422,7 @@ const ScriptScreen = ({ navigation }) => {
 
   const handleDeleteScript = async (scriptName) => {
     try {
-      await fetchWithToken(`http://${serverHost}:${serverPort}/delete_script`, {
+      await fetchWithToken(`https://${serverHost}:${serverPort}/delete_script`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
