@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider, Text } from 'react-native-paper';
+
+import { StripeProvider } from '@stripe/stripe-react-native';
 import AuthScreen from './AuthScreen';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, AuthContext } from './AuthContext';
@@ -21,6 +23,7 @@ import AdminTicketDetailScreen from './AdminTicketDetailScreen';
 import ScriptScreen from './ScriptScreen';
 import VideoEditor from './VideoEditor';
 import './i18n.js'; // Make sure to import the i18n configuration
+import PaymentScreen from './PaymentScreen.js';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -100,8 +103,16 @@ const AdminTabs = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          if (route.name === 'SupportTickets') {
+          if (route.name === 'Manage') {
+            iconName = 'file-video';
+          } else if (route.name === 'Settings') {
+            iconName = 'account-settings';
+          } else if (route.name === 'SupportTickets') {
             iconName = 'message';
+          } else if (route.name === 'ScriptEditor') {
+            iconName = 'script';
+          } else if (route.name === 'VideoEditor') {
+            iconName = 'video';
           }
 
           return <Icon name={iconName} size={size} color={color} />;
@@ -109,8 +120,16 @@ const AdminTabs = () => {
         tabBarLabel: ({ color }) => {
           let label;
 
-          if (route.name === 'SupportTickets') {
+          if (route.name === 'Manage') {
+            label = t('manage');
+          } else if (route.name === 'Settings') {
+            label = t('settings');
+          } else if (route.name === 'SupportTickets') {
             label = t('supportTickets');
+          } else if (route.name === 'ScriptEditor') {
+            label = t('script');
+          } else if (route.name === 'VideoEditor') {
+            label = t('videoEditor');
           }
 
           return <Text style={{ color, fontSize: 10 }}>{label}</Text>;
@@ -119,9 +138,11 @@ const AdminTabs = () => {
       })}
     >
       <Tab.Screen name="SupportTickets" component={AdminSupportTicketsScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 };
+
 
 const AppNavigator = () => {
   const { user, isAdmin } = useContext(AuthContext);
@@ -167,6 +188,11 @@ const AppNavigator = () => {
                   component={VideoEditor}
                   options={{ title: t('videoEditor') }}
                 />
+                <Stack.Screen
+                  name="Payment"
+                  component={PaymentScreen}
+                  options={{ title: t('payment') }}
+                />
               </>
             )
           ) : (
@@ -182,12 +208,16 @@ const AppNavigator = () => {
   );
 };
 
+
 export default function App() {
   return (
+    <StripeProvider publishableKey="your-publishable-key">
     <AuthProvider>
       <PaperProvider>
         <AppNavigator />
+
       </PaperProvider>
     </AuthProvider>
+      </StripeProvider>
   );
 }

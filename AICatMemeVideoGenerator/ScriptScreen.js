@@ -1,22 +1,34 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity, Modal, ImageBackground } from 'react-native';
+import { View, FlatList, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity, Modal, ImageBackground, Dimensions } from 'react-native';
 import { TextInput, Button, Text, Card, Snackbar, Searchbar, Dialog, Portal, FAB, IconButton, List } from 'react-native-paper';
+import YoutubePlayer from 'react-native-youtube-iframe';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { VideoContext } from './VideoContext';
-import { serverHost, serverPort } from './consts';
+import { serverHost, serverPort, actionVideoDict, locationVideoDict } from './consts';
 import { fetchWithToken } from './api';
 import RNFetchBlob from 'rn-fetch-blob';
 import catBackground from './cat_background.jpg';
 const PAGE_SIZE = 3;
 
-const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder }) => {
-  const { t, i18n } = useTranslation();
+const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLocation }) => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [youtubeVisible, setYoutubeVisible] = useState(false);
+  const [youtubeVideoId, setYoutubeVideoId] = useState('');
 
   const filteredItems = items.filter(item => 
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleViewYoutube = (videoId) => {
+    if (videoId) {
+      setYoutubeVideoId(videoId);
+      setYoutubeVisible(true);
+    } else {
+      console.error('Invalid YouTube URL');
+    }
+  };
 
   return (
     <Modal visible={visible} onRequestClose={onClose} animationType="slide">
@@ -31,7 +43,12 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder }) => 
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <List.Item
-              title={item.label}
+              title={t(item.label)}
+              right={() => (
+                <Button onPress={() => handleViewYoutube(isLocation ? locationVideoDict[item.label] : actionVideoDict[item.label])}>
+                  {t('view')}
+                </Button>
+              )}
               onPress={() => {
                 onSelectItem(item);
                 onClose();
@@ -41,6 +58,21 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder }) => 
         />
         <Button onPress={onClose}>{t('close')}</Button>
       </View>
+
+      <Modal visible={youtubeVisible} onRequestClose={() => setYoutubeVisible(false)} animationType="slide" transparent>
+        <View style={styles.youtubeModalOverlay}>
+          <View style={styles.youtubeModalContainer}>
+            <YoutubePlayer
+              height={Dimensions.get('window').height / 3.7}
+              width={Dimensions.get('window').width}
+              play
+              videoId={youtubeVideoId}
+              onReady={() => console.log('YouTube video ready')}
+            />
+            <Button style={{width: '100%'}} onPress={() => setYoutubeVisible(false)}>{t('close')}</Button>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 };
@@ -661,12 +693,14 @@ const ScriptScreen = ({ navigation }) => {
       >
         {snackbarMessage}
       </Snackbar>
+      
       <SearchModal
         visible={locationModalVisible}
         onClose={() => setLocationModalVisible(false)}
         items={locationItems}
         onSelectItem={(item) => handleSceneChange(item.value, currentSceneIndex, 'location')}
         placeholder={t('searchLocation')}
+        isLocation
       />
 
       <SearchModal
@@ -675,6 +709,7 @@ const ScriptScreen = ({ navigation }) => {
         items={actionItems}
         onSelectItem={(item) => handleCharacterChange(item.value, currentSceneIndex, currentCharacterIndex, 'action')}
         placeholder={t('searchAction')}
+        isLocation={false}
       />
       </View>
       </ImageBackground>
@@ -757,6 +792,20 @@ const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
     resizeMode: 'stretch',
+    justifyContent: 'center',
+  },
+
+  youtubeModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // dim background
+  },
+  youtubeModalContainer: {
+    backgroundColor: 'white',
+    width: '100%',
+    borderRadius: 10,
+    alignItems: 'center',
     justifyContent: 'center',
   },
 });
