@@ -23,11 +23,11 @@ export default function HeaderWithBugReport({ navigation }) {
       <TouchableOpacity 
           onPress={handleBugReport}
           style={{flexDirection: 'row'}}>
-        <Text style={{color: 'grey', fontSize: 12, marginTop: 6}}>{t('reportBug')}</Text>
+        <Text style={{color: 'rgb(103, 80, 164)', fontSize: 12, marginTop: 6}}>{t('reportBug')}</Text>
         <Icon
           name="bug"
           size={24}
-          color="white"
+          color="rgb(103, 80, 164)"
           style={styles.icon}
         />
       </TouchableOpacity>
@@ -46,6 +46,6 @@ const styles = StyleSheet.create({
   icon: {
     marginTop: 5,
     marginRight: 5,
-    color: 'grey'
+    color: 'rgb(103, 80, 164)'
   },
 });

@@ -290,7 +290,7 @@ const ScriptScreen = ({ navigation }) => {
             scene_index: 1,
             location: '',
             characters: [
-              { identity: '', action: '', words: '', enter: '', time: '', exit: '' }
+              { identity: '', action: '', words: '', enter: '', exit: '' }
             ]
           }
         ]
@@ -346,13 +346,13 @@ const ScriptScreen = ({ navigation }) => {
         return t('pleaseValidLocation');
       }
       for (const character of scene.characters) {
-        if (!character.identity || !character.action || !character.words || !character.enter || !character.time || !character.exit) {
+        if (!character.identity || !character.action || !character.words || !character.enter || !character.exit) {
           return t('pleaseFillAllFields');
         }
         else if (character.action && !actions.includes(character.action)) {
           return t('pleaseValidAction');
         }
-        if (!isValidTimeFormat(character.enter) || !isValidTimeFormat(character.time) || !isValidTimeFormat(character.exit)) {
+        if (!isValidTimeFormat(character.enter) || !isValidTimeFormat(character.exit)) {
           return t('pleaseValidTime');
         }
       }
@@ -505,7 +505,7 @@ const ScriptScreen = ({ navigation }) => {
   };
 
   const handleAddCharacter = (sceneIndex) => {
-    const newCharacter = { identity: '', action: '', words: '', enter: '', time: '', exit: '' };
+    const newCharacter = { identity: '', action: '', words: '', enter: '', exit: '' };
     const newScenes = [...currentScript.script.scenes];
     newScenes.find((scene) => scene.scene_index === sceneIndex).characters.push(newCharacter);
     setCurrentScript(prevScript => ({
@@ -532,7 +532,7 @@ const ScriptScreen = ({ navigation }) => {
   };
 
   const handleAddScene = () => {
-    const newScene = { scene_index: currentScript.script.scenes.length + 1, location: '', characters: [{ identity: '', action: '', words: '', enter: '', time: '', exit: '' }] };
+    const newScene = { scene_index: currentScript.script.scenes.length + 1, location: '', characters: [{ identity: '', action: '', words: '', enter: '', exit: '' }] };
     const newScenes = [...currentScript.script.scenes];
     newScenes.push(newScene);
     setCurrentScript(prevScript => ({
@@ -615,12 +615,6 @@ const ScriptScreen = ({ navigation }) => {
                       />
                       <TextInput
                         style={styles.input}
-                        label={t('time')}
-                        value={character.time}
-                        onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'time')}
-                      />
-                      <TextInput
-                        style={styles.input}
                         label={t('exitTime')}
                         value={character.exit}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'exit')}
@@ -631,13 +625,13 @@ const ScriptScreen = ({ navigation }) => {
                 </View>
               ))}
               <Button style={{ marginBottom: 5 }} icon="plus" onPress={() => handleAddScene()}>{t('addScene')}</Button>
-              <Button style={{ marginBottom: 5 }} mode='outlined' onPress={handleSaveScript}>{t('saveScript')}</Button>
+              <Button style={{ marginBottom: 5 }} onPress={handleSaveScript}>{t('saveScript')}</Button>
             </ScrollView>
           ) : (
             <>
-              <Button mode='outlined' onPress={async () => { await setCurrentScript(item); setEditMode(true); }} style={styles.button}>{t('editScript')}</Button>
-              <Button mode='outlined' onPress={() => showDeleteDialog(item.script_name)} style={styles.button}>{t('deleteScript')}</Button>
-              <Button mode='outlined' onPress={async () => { await setCurrentScript(item); handleGenerateVideo(); }} disabled={isSending}>{t('generateVideo')}</Button>
+              <Button onPress={async () => { await setCurrentScript(item); setEditMode(true); }} style={styles.button}>{t('editScript')}</Button>
+              <Button onPress={() => showDeleteDialog(item.script_name)} style={styles.button}>{t('deleteScript')}</Button>
+              <Button onPress={async () => { await setCurrentScript(item); handleGenerateVideo(); }} disabled={isSending}>{t('generateVideo')}</Button>
             </>
           )}
         </Card.Content>

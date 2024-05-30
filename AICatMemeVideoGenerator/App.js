@@ -63,7 +63,7 @@ const HomeTabs = () => {
             iconName = 'video';
           }
 
-          return <Icon name={iconName} size={size} color={color} />;
+          return <Icon name={iconName} size={size} color={"rgb(103, 80, 164)"} />;
         },
         tabBarLabel: ({ color }) => {
           let label;
@@ -80,7 +80,7 @@ const HomeTabs = () => {
             label = t('videoEditor');
           }
 
-          return <Text style={{ color, fontSize: 10 }}>{label}</Text>;
+          return <Text style={{ color: "rgb(103, 80, 164)", fontSize: 10 }}>{label}</Text>;
         },
         tabBarStyle: { backgroundColor: '#f5f5f5' }
       })}
@@ -115,7 +115,7 @@ const AdminTabs = () => {
             iconName = 'video';
           }
 
-          return <Icon name={iconName} size={size} color={color} />;
+          return <Icon name={iconName} size={size} color={"rgb(103, 80, 164)"} />;
         },
         tabBarLabel: ({ color }) => {
           let label;
@@ -132,7 +132,7 @@ const AdminTabs = () => {
             label = t('videoEditor');
           }
 
-          return <Text style={{ color, fontSize: 10 }}>{label}</Text>;
+          return <Text style={{ color: "rgb(103, 80, 164)", fontSize: 10 }}>{label}</Text>;
         },
         tabBarStyle: { backgroundColor: '#f5f5f5' }
       })}

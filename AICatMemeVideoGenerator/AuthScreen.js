@@ -1,15 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground } from 'react-native';
+import { View, StyleSheet, Image, ImageBackground } from 'react-native';
 import { TextInput, Button, Snackbar, IconButton } from 'react-native-paper';
-import { Text } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import DeviceInfo from 'react-native-device-info';
 import { serverHost, serverPort } from './consts';
-import {apiKey} from './frontend_secret_key';
+import { apiKey } from './frontend_secret_key';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import catBackground from './cat_background.jpg';
+import logo from './logo.png'; // Import the logo image
 
 export default function AuthScreen() {
   const { t } = useTranslation();
@@ -40,6 +40,10 @@ export default function AuthScreen() {
     }
   };
 
+  const handleFirebaseError = (errorCode) => {
+    return t(`firebaseErrors.${errorCode}`) || errorCode;
+  };
+
   const handleLogin = () => {
     if (email.trim() === '' || password.trim() === '') {
       showSnackbar(t('emailPasswordEmpty'));
@@ -65,7 +69,7 @@ export default function AuthScreen() {
         }
       })
       .catch(error => {
-        showSnackbar(error.message);
+        showSnackbar(handleFirebaseError(error.code));
       });
   };
 
@@ -84,7 +88,7 @@ export default function AuthScreen() {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ username: email, device_id: deviceId, app_key: frontend_secret_key })
+          body: JSON.stringify({ username: email, device_id: deviceId, app_key: apiKey })
         });
         const data = await response.json();
         if (response.ok) {
@@ -94,50 +98,51 @@ export default function AuthScreen() {
         }
       })
       .catch(error => {
-        showSnackbar(error.message);
+        showSnackbar(handleFirebaseError(error.code));
       });
   };
 
   return (
     <ImageBackground source={catBackground} style={styles.backgroundImage}>
-    <View style={styles.container}>
-      <TextInput
-        label={t('email')}
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        mode="outlined"
-      />
-      <View style={styles.passwordContainer}>
+      <View style={styles.container}>
+        <Image source={logo} style={styles.logo} />
         <TextInput
-          label={t('password')}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!passwordVisible}
-          style={styles.passwordInput}
+          label={t('email')}
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
           mode="outlined"
         />
-        <IconButton
-          icon={passwordVisible ? "eye-off" : "eye"}
-          onPress={() => setPasswordVisible(!passwordVisible)}
-          style={styles.eyeIcon}
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            label={t('password')}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!passwordVisible}
+            style={styles.passwordInput}
+            mode="outlined"
+          />
+          <IconButton
+            icon={passwordVisible ? "eye-off" : "eye"}
+            onPress={() => setPasswordVisible(!passwordVisible)}
+            style={styles.eyeIcon}
+          />
+        </View>
+        <Button mode="contained" onPress={handleLogin} style={styles.button}>
+          {t('login')}
+        </Button>
+        <Button mode="outlined" onPress={handleSignUp} style={styles.button}>
+          {t('signUp')}
+        </Button>
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={Snackbar.DURATION_SHORT}
+        >
+          {snackbarMessage}
+        </Snackbar>
       </View>
-      <Button mode="contained" onPress={handleLogin} style={styles.button}>
-        {t('login')}
-      </Button>
-      <Button mode="outlined" onPress={handleSignUp} style={styles.button}>
-        {t('signUp')}
-      </Button>
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={Snackbar.DURATION_SHORT}
-      >
-        {snackbarMessage}
-      </Snackbar>
-    </View>
-      </ImageBackground>
+    </ImageBackground>
   );
 }
 
@@ -146,6 +151,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+  },
+  logo: {
+    flex: 0,
+    width: 150,
+    height: 150,
+    alignSelf: 'center',
   },
   input: {
     marginBottom: 16,
@@ -164,7 +175,6 @@ const styles = StyleSheet.create({
   button: {
     marginBottom: 8,
   },
-
   backgroundImage: {
     flex: 1,
     resizeMode: 'stretch',

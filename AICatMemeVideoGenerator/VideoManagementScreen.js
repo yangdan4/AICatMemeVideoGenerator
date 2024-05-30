@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useContext, useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, ImageBackground } from 'react-native';
 import { Button, Card, Text, Searchbar, Dialog, Portal } from 'react-native-paper';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -12,6 +12,8 @@ import catBackground from './cat_background.jpg';
 const PAGE_SIZE = 5;
 
 export default function VideoManagementScreen() {
+
+  
   const { t } = useTranslation();
   const { videos, deleteVideo } = useContext(VideoContext);
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,6 +84,7 @@ export default function VideoManagementScreen() {
   };
 
   const showDeleteDialog = (videoPath) => {
+    getButtonColor()
     setVideoToDelete(videoPath);
     setDeleteDialogVisible(true);
   };
@@ -110,10 +113,10 @@ export default function VideoManagementScreen() {
             paused={true}
           />
           <View style={styles.buttonGroup}>
-            <Button mode="contained" onPress={() => showDeleteDialog(item)} style={{ marginRight: 10 }}>
+            <Button onPress={() => showDeleteDialog(item)} style={{ marginRight: 10 }}>
               {t('delete')}
             </Button>
-            <Button mode="contained" onPress={() => shareVideo(item)}>
+            <Button  onPress={() => shareVideo(item)}>
               {t('share')}
             </Button>
           </View>
