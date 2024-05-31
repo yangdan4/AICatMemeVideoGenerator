@@ -23,8 +23,10 @@ import TicketDetailsScreen from './TicketDetailsScreen';
 import AdminTicketDetailScreen from './AdminTicketDetailScreen';
 import ScriptScreen from './ScriptScreen';
 import VideoEditor from './VideoEditor';
-import './i18n.js'; // Make sure to import the i18n configuration
 import PaymentScreen from './PaymentScreen.js';
+import SuccessScreen from './SuccessScreen'; // Import SuccessScreen
+import CancelScreen from './CancelScreen'; // Import CancelScreen
+import './i18n.js'; // Make sure to import the i18n configuration
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -62,6 +64,8 @@ const HomeTabs = () => {
             iconName = 'script';
           } else if (route.name === 'VideoEditor') {
             iconName = 'video';
+          } else if (route.name === 'Payment') {
+            iconName = 'credit-card';
           }
 
           return <Icon name={iconName} size={size} color={"rgb(103, 80, 164)"} />;
@@ -79,6 +83,8 @@ const HomeTabs = () => {
             label = t('script');
           } else if (route.name === 'VideoEditor') {
             label = t('videoEditor');
+          } else if (route.name === 'Payment') {
+            label = t('payment');
           }
 
           return <Text style={{ color: "rgb(103, 80, 164)", fontSize: 10 }}>{label}</Text>;
@@ -90,7 +96,6 @@ const HomeTabs = () => {
       <Tab.Screen name="Manage" component={VideoManagementScreen} options={{ headerShown: false }} />
       <Tab.Screen name="SupportTickets" component={SupportTicketsScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
-      {/*<Tab.Screen name="VideoEditor" component={VideoEditor} options={{ headerShown: false }} />*/}
     </Tab.Navigator>
   );
 };
@@ -144,6 +149,15 @@ const AdminTabs = () => {
   );
 };
 
+const linking = {
+  prefixes: ['Clipurr://'], // Replace with your actual URL scheme
+  config: {
+    screens: {
+      Success: 'success',
+      Cancel: 'cancel',
+    },
+  },
+};
 
 const AppNavigator = () => {
   const { user, isAdmin } = useContext(AuthContext);
@@ -151,7 +165,7 @@ const AppNavigator = () => {
 
   return (
     <VideoProvider>
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <Stack.Navigator>
           {user ? (
             isAdmin ? (
@@ -189,11 +203,6 @@ const AppNavigator = () => {
                   component={VideoEditor}
                   options={{ title: t('videoEditor') }}
                 />
-                <Stack.Screen
-                  name="Payment"
-                  component={PaymentScreen}
-                  options={{ title: t('payment') }}
-                />
               </>
             )
           ) : (
@@ -209,14 +218,14 @@ const AppNavigator = () => {
   );
 };
 
-
 export default function App() {
   return (
-    <StripeProvider publishableKey={stripeKey}>
+    <StripeProvider
+      publishableKey={stripeKey}
+    >
       <AuthProvider>
         <PaperProvider>
           <AppNavigator />
-
         </PaperProvider>
       </AuthProvider>
     </StripeProvider>
