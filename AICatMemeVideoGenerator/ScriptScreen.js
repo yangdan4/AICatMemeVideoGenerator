@@ -264,13 +264,13 @@ const ScriptScreen = ({ navigation }) => {
       setScripts([responseJson.script, ...scripts]);
       setFilteredScripts([responseJson.script, ...scripts]);
       setCurrentScript(responseJson.script);
-    } catch (error) {
-      console.error("Error in generateScript:", error);
-      setSnackbarMessage(error.message);
-      setSnackbarVisible(true);
-    } finally {
       setSnackbarMessage(t('scriptDone'));
       setSnackbarVisible(true);
+    } catch (error) {
+      // console.error("Error in generateScript:", error);
+      setSnackbarMessage(t('errorGeneratingScript'));
+      setSnackbarVisible(true);
+    } finally {
       setIsSending(false);
     }
   };
