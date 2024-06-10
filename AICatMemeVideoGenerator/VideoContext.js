@@ -6,6 +6,11 @@ export const VideoContext = createContext();
 
 export const VideoProvider = ({ children }) => {
   const [videos, setVideos] = useState([]);
+
+  useEffect(() => {
+    loadVideos();
+  }, []);
+
   const loadVideos = async () => {
     const { fs } = RNFetchBlob;
     const videoDir = fs.dirs.DocumentDir;

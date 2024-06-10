@@ -131,7 +131,7 @@ const ScriptScreen = ({ navigation }) => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const { fetchWithToken, user } = useContext(AuthContext);
+  const { fetchWithToken, user, planType } = useContext(AuthContext);
   const { addVideo } = useContext(VideoContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -152,6 +152,9 @@ const ScriptScreen = ({ navigation }) => {
 
   useEffect(() => {
     fetchAllScripts();
+  }, [user]);
+
+  useEffect(() => {
     fetchPresets();
   }, []);
 
@@ -387,13 +390,13 @@ const ScriptScreen = ({ navigation }) => {
 
       const videoPath = await saveVideoBlob(response, item.script_name);
       addVideo(videoPath);
+      setSnackbarMessage(t('videoDone'));
+      setSnackbarVisible(true);
     } catch (error) {
       console.error('Error generating video:', error);
       setSnackbarMessage(t('errorGeneratingVideo'));
       setSnackbarVisible(true);
     } finally {
-      setSnackbarMessage(t('videoDone'));
-      setSnackbarVisible(true);
       setIsSending(false);
     }
   };

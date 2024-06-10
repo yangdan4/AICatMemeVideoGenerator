@@ -11,11 +11,11 @@ export default function AdminSupportTicketsScreen({ navigation }) {
   const [tickets, setTickets] = useState([]);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const { sentReport, fetchWithToken } = useContext(AuthContext);
+  const { sentReport, fetchWithToken, user } = useContext(AuthContext);
 
   useEffect(() => {
     fetchTickets();
-  }, [sentReport]);
+  }, [sentReport, user]);
 
   const fetchTickets = async () => {
     try {

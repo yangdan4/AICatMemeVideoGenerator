@@ -41,15 +41,15 @@ export default function SettingsScreen({ navigation }) {
       }
     };
 
-    fetchSubscriptionStatus();
-  }, [user.email]);
+    user && fetchSubscriptionStatus();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
       await auth().signOut();
       setUser(null);
     } catch (error) {
-      console.error('Failed to logout: ' + error.message);
+      // console.error('Failed to logout: ' + error.message);
     }
   };
 

@@ -37,7 +37,7 @@ export default function AdminTicketDetailScreen({ route, navigation }) {
 
   useEffect(() => {
     fetchMessages();
-  }, [fetchMessages]);
+  }, [user]);
 
   const sendMessage = async () => {
     if (!message.trim()) {

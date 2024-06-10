@@ -1,7 +1,6 @@
 import React, { useRef, useContext, useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, ImageBackground } from 'react-native';
 import { Button, Card, Text, Searchbar, Dialog, Portal } from 'react-native-paper';
-import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
 import { VideoContext } from './VideoContext';
 import Video from 'react-native-video';
@@ -15,7 +14,7 @@ export default function VideoManagementScreen() {
 
   
   const { t } = useTranslation();
-  const { videos, deleteVideo, loadVideos } = useContext(VideoContext);
+  const { videos, deleteVideo } = useContext(VideoContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredVideos, setFilteredVideos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,17 +44,6 @@ export default function VideoManagementScreen() {
     );
     setFilteredVideos(filtered);
     setCurrentPage(1);
-  };
-
-  const copyVideo = async (videoPath) => {
-    const { fs } = RNFetchBlob;
-    const destPath = `${fs.dirs.DownloadDir}/${videoPath.split('/').pop()}`;
-    try {
-      await fs.cp(videoPath, destPath);
-      Alert.alert(t('success'), t('videoCopied', { path: destPath }));
-    } catch (error) {
-      Alert.alert(t('error'), t('failedToCopyVideo'));
-    }
   };
 
   const shareVideo = async (videoPath) => {

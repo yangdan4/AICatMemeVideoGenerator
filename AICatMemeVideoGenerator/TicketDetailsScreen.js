@@ -37,7 +37,7 @@ export default function TicketDetailScreen({ route }) {
 
   useEffect(() => {
     fetchMessages();
-  }, [fetchMessages]);
+  }, [user]);
 
   const sendMessage = async () => {
     if (!message.trim()) {

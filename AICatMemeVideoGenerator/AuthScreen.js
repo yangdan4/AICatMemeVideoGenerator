@@ -13,7 +13,7 @@ import logo from './logo.png'; // Import the logo image
 
 export default function AuthScreen() {
   const { t } = useTranslation();
-  const { setUser, email, setEmail, deviceId, setDeviceId } = useContext(AuthContext);
+  const { setUser, email, setEmail, deviceId, setDeviceId, saveToken } = useContext(AuthContext);
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -30,14 +30,6 @@ export default function AuthScreen() {
     setSnackbarVisible(true);
   };
 
-  const saveToken = async (token) => {
-    try {
-      await AsyncStorage.setItem('userToken', token);
-    } catch (error) {
-      console.error("Error saving token", error);
-    }
-  };
-
   const handleFirebaseError = (errorCode) => {
     return t(`firebaseErrors.${errorCode}`) || errorCode;
   };
@@ -50,7 +42,6 @@ export default function AuthScreen() {
 
     auth().signInWithEmailAndPassword(email, password)
       .then(async userCredential => {
-        setUser(userCredential.user);
         showSnackbar(t('loginSuccessful'));
         const response = await fetch(`https://${serverHost}:${serverPort}/get_token`, {
           method: 'POST',
@@ -62,6 +53,7 @@ export default function AuthScreen() {
         const data = await response.json();
         if (response.ok) {
           await saveToken(data.token);
+          setUser(userCredential.user);
         } else {
           showSnackbar('Failed to get token');
         }
@@ -79,7 +71,6 @@ export default function AuthScreen() {
 
     auth().createUserWithEmailAndPassword(email, password)
       .then(async userCredential => {
-        setUser(userCredential.user);
         showSnackbar(t('registrationSuccessful'));
         const response = await fetch(`https://${serverHost}:${serverPort}/get_token`, {
           method: 'POST',
@@ -91,6 +82,7 @@ export default function AuthScreen() {
         const data = await response.json();
         if (response.ok) {
           await saveToken(data.token);
+          setUser(userCredential.user);
         } else {
           showSnackbar('Failed to get token');
         }
