@@ -160,6 +160,7 @@
     "auth/missing-verification-code": "確認コードが見つかりません。",
     "auth/missing-verification-id": "確認 ID が見つかりません。"
   },
+  "(suggested)": "(提案)",
   "waitMessage": "お待ちください、支払いページを読み込んでいます",
   "paymentSuccess": "お支払いが成功しました！",
   "failedToInitialize": "支払いフォームの初期化が失敗しました",

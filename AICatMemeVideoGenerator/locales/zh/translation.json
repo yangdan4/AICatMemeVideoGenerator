@@ -161,6 +161,7 @@
     "auth/missing-verification-id": "验证 ID 丢失。"
   },
 
+  "(suggested)": "(生成)",
   "waitMessage": "请稍等，支付页面正在加载",
   "paymentSuccess": "您的支付已成功！",
   "failedToInitialize": "初始化支付表单失败",

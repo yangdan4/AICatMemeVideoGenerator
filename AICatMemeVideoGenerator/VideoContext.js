@@ -6,11 +6,6 @@ export const VideoContext = createContext();
 
 export const VideoProvider = ({ children }) => {
   const [videos, setVideos] = useState([]);
-
-  useEffect(() => {
-    loadVideos();
-  }, []);
-
   const loadVideos = async () => {
     const { fs } = RNFetchBlob;
     const videoDir = fs.dirs.DocumentDir;
@@ -21,17 +16,17 @@ export const VideoProvider = ({ children }) => {
 
   const addVideo = async (videoPath) => {
     setVideos(prevVideos => [...prevVideos, videoPath]);
-    loadVideos(); // Refresh the list
+    loadVideos();
   };
 
   const deleteVideo = async (videoPath) => {
     const { fs } = RNFetchBlob;
     await fs.unlink(videoPath);
-    loadVideos(); // Refresh the list
+    loadVideos();
   };
 
   return (
-    <VideoContext.Provider value={{ videos, addVideo, deleteVideo }}>
+    <VideoContext.Provider value={{ videos, addVideo, deleteVideo, loadVideos }}>
       {children}
     </VideoContext.Provider>
   );

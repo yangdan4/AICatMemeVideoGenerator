@@ -162,6 +162,7 @@
   },
 
 
+  "(suggested)": "(Suggested)",
   "waitMessage": "Wait a moment for the payment screen to load",
   "paymentSuccess": "Your payment was successful!",
   "failedToInitialize": "Failed to initialize payment sheet",
@@ -170,6 +171,11 @@
   "payment": "Payment",
   "subscription": "Subscription",
   "subscribe": "Choose",
+  "subscriptionCancelled": "Subscription Cancelled",
+  "failedToCancel": "Failed to Cancel",
+  "subscriptionRenewed": "Subscription Renewed",
+  "failedToRenew": "Failed to Renew",
+  "renew": "Renew",
   "chooseYourPlan": "Choose your plan",
   "stripeError": {
     "payment_failed": "Payment failed. Please try again.",

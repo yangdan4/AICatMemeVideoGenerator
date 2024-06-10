@@ -154,6 +154,7 @@
     "auth/missing-verification-code": "驗證碼丟失。",
     "auth/missing-verification-id": "驗證 ID 丟失。"
   },
+  "(suggested)": "(生成)",
   "waitMessage": "請稍等，支付頁面正在加載",
   "paymentSuccess": "您的支付已成功！",
   "failedToInitialize": "初始化支付表單失敗",

@@ -15,7 +15,7 @@ export default function VideoManagementScreen() {
 
   
   const { t } = useTranslation();
-  const { videos, deleteVideo } = useContext(VideoContext);
+  const { videos, deleteVideo, loadVideos } = useContext(VideoContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredVideos, setFilteredVideos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,10 +25,8 @@ export default function VideoManagementScreen() {
   const [videoToDelete, setVideoToDelete] = useState(null);
 
   useEffect(() => {
-    if (isFocused) {
-      setFilteredVideos(videos);
-    }
-  }, [isFocused, videos]);
+    setFilteredVideos(videos);
+  }, [videos]);
 
   useEffect(() => {
     paginateVideos();
@@ -84,7 +82,6 @@ export default function VideoManagementScreen() {
   };
 
   const showDeleteDialog = (videoPath) => {
-    getButtonColor()
     setVideoToDelete(videoPath);
     setDeleteDialogVisible(true);
   };
@@ -136,6 +133,7 @@ export default function VideoManagementScreen() {
         style={styles.searchbar}
       />
       <FlatList
+        key={isFocused}
         data={paginatedVideos}
         renderItem={renderVideoCard}
         keyExtractor={(item, index) => index.toString()}

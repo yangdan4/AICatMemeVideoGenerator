@@ -131,7 +131,7 @@ const ScriptScreen = ({ navigation }) => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const { fetchWithToken } = useContext(AuthContext);
+  const { fetchWithToken, user } = useContext(AuthContext);
   const { addVideo } = useContext(VideoContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -188,7 +188,6 @@ const ScriptScreen = ({ navigation }) => {
 
   const fetchPresets = async () => {
     try {
-      const language = getLanguage();
       const response = await fetchWithToken(`https://${serverHost}:${serverPort}/get_presets`, {
         method: 'POST',
         headers: {
@@ -259,9 +258,9 @@ const ScriptScreen = ({ navigation }) => {
       }
 
       const responseJson = await response.json();
-      setScripts([responseJson, ...scripts]);
-      setFilteredScripts([responseJson, ...scripts]);
-      setCurrentScript(responseJson);
+      setScripts([responseJson.script, ...scripts]);
+      setFilteredScripts([responseJson.script, ...scripts]);
+      setCurrentScript(responseJson.script);
     } catch (error) {
       console.error("Error in generateScript:", error);
       setSnackbarMessage(error.message);
@@ -364,11 +363,10 @@ const ScriptScreen = ({ navigation }) => {
     return regex.test(time);
   };
 
-  const handleGenerateVideo = async () => {
+  const handleGenerateVideo = async (item) => {
     setIsSending(true);
     setSnackbarMessage(t('videoGenerating'));
     setSnackbarVisible(true);
-
     try {
       const language = getLanguage();
       const response = await fetchWithToken(`https://${serverHost}:${serverPort}/create_video`, {
@@ -377,8 +375,9 @@ const ScriptScreen = ({ navigation }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          script: currentScript.script,
+          script: item.script,
           language: language,
+          email: user.email
         }),
       });
 
@@ -386,7 +385,7 @@ const ScriptScreen = ({ navigation }) => {
         throw new Error(t('errorGeneratingVideo'));
       }
 
-      const videoPath = await saveVideoBlob(response);
+      const videoPath = await saveVideoBlob(response, item.script_name);
       addVideo(videoPath);
     } catch (error) {
       console.error('Error generating video:', error);
@@ -399,13 +398,13 @@ const ScriptScreen = ({ navigation }) => {
     }
   };
 
-  const saveVideoBlob = async (response) => {
+  const saveVideoBlob = async (response, script_name) => {
     const { fs } = RNFetchBlob;
     const videoDir = fs.dirs.DocumentDir;
-    const filePath = `${videoDir}/${currentScript.script_name}.mp4`;
-
+    const filePath = `${videoDir}/${script_name}.mp4`;
+  
     return new Promise((resolve, reject) => {
-      response.blob().then(blob => {
+      const writeFile = (blob) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64data = reader.result.split(',')[1]; // Extract base64 data
@@ -415,7 +414,25 @@ const ScriptScreen = ({ navigation }) => {
         };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
-      }).catch(reject);
+      };
+  
+      const saveBlob = () => {
+        response.blob()
+          .then(blob => {
+            RNFetchBlob.fs.exists(filePath)
+              .then((exists) => {
+                if (exists) {
+                  // If the file exists, delete it
+                  return RNFetchBlob.fs.unlink(filePath);
+                }
+              })
+              .then(() => writeFile(blob))
+              .catch(reject);
+          })
+          .catch(reject);
+      };
+  
+      saveBlob();
     });
   };
 
@@ -570,9 +587,11 @@ const ScriptScreen = ({ navigation }) => {
                   />
                   <TouchableOpacity onPress={() => {setLocationModalVisible(true); setCurrentSceneIndex(scene.scene_index); setCurrentCharacterIndex(null);}}>
                     <TextInput
+                      
+                      textColor={scene.location && !locations.includes(scene.location) ? 'red' : 'black'}
                       style={styles.input}
                       label={ t('location')}
-                      value={scene.location && !locations.includes(scene.location) ? `${scene.location} ${t('(Suggested)')}` : scene.location}
+                      value={scene.location && !locations.includes(scene.location) ? `${scene.location} ${t('(suggested)')}` : scene.location}
                       editable={false}
                     />
                   </TouchableOpacity>
@@ -594,9 +613,11 @@ const ScriptScreen = ({ navigation }) => {
                       />
                       <TouchableOpacity onPress={() => {setActionModalVisible(true); setCurrentSceneIndex(scene.scene_index); setCurrentCharacterIndex(characterIndex);}}>
                         <TextInput
+                      
+                          textColor={character.action && !actions.includes(character.action) ? 'red' : 'black'}
                           style={styles.input}
                           label={ t('action')}
-                          value={character.action && !actions.includes(character.action) ? `${character.action} ${t('(Suggested)')}` : character.action}
+                          value={character.action && !actions.includes(character.action) ? `${character.action} ${t('(suggested)')}` : character.action}
                           editable={false}
                         />
                       </TouchableOpacity>
@@ -630,7 +651,7 @@ const ScriptScreen = ({ navigation }) => {
             <>
               <Button onPress={async () => { await setCurrentScript(item); setEditMode(true); }} style={styles.button}>{t('editScript')}</Button>
               <Button onPress={() => showDeleteDialog(item.script_name)} style={styles.button}>{t('deleteScript')}</Button>
-              <Button onPress={async () => { await setCurrentScript(item); handleGenerateVideo(); }} disabled={isSending}>{t('generateVideo')}</Button>
+              <Button onPress={async () => { handleGenerateVideo(item); }} disabled={isSending}>{t('generateVideo')}</Button>
             </>
           )}
         </Card.Content>
