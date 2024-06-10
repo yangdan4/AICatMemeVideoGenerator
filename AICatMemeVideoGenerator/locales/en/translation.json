@@ -166,10 +166,10 @@
   "paymentSuccess": "Your payment was successful!",
   "failedToInitialize": "Failed to initialize payment sheet",
   "subscribeMonthly": "Monthly",
-  "subscribeYearly": "Annually",
+  "subscribeYearly": "Annual",
   "payment": "Payment",
   "subscription": "Subscription",
-  "subscribe": "Subscribe",
+  "subscribe": "Choose",
   "chooseYourPlan": "Choose your plan",
   "stripeError": {
     "payment_failed": "Payment failed. Please try again.",

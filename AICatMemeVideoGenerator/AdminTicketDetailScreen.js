@@ -4,13 +4,12 @@ import { Text, TextInput, Button, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
-import { fetchWithToken } from './api';
 import catBackground from './cat_background.jpg';
 
 export default function AdminTicketDetailScreen({ route, navigation }) {
   const { t } = useTranslation();
   const { ticket } = route.params;
-  const { user, setSentReport, sentReport } = useContext(AuthContext);
+  const { user, setSentReport, sentReport, fetchWithToken } = useContext(AuthContext);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [screenshotUrl, setScreenshotUrl] = useState('');

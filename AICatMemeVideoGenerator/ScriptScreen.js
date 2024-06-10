@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { VideoContext } from './VideoContext';
 import { serverHost, serverPort, actionVideoDict } from './consts';
-import { fetchWithToken } from './api';
 import RNFetchBlob from 'rn-fetch-blob';
 import catBackground from './cat_background.jpg';
 const PAGE_SIZE = 3;
@@ -132,7 +131,7 @@ const ScriptScreen = ({ navigation }) => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const { setUser } = useContext(AuthContext);
+  const { fetchWithToken } = useContext(AuthContext);
   const { addVideo } = useContext(VideoContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);

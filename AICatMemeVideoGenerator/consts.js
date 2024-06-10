@@ -1,6 +1,6 @@
 module.exports = {
     serverHost: "clipurr.ddnsfree.com",
-    serverPort: "5000",
+    serverPort: "443",
     actionVideoDict: {
       "Strongly disagree": "Fa1aQVakG9c",
       "Screaming": "xmMRrD5ed1A",

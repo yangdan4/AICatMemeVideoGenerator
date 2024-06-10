@@ -6,7 +6,6 @@ import { useStripe } from '@stripe/stripe-react-native';
 import { AuthContext } from './AuthContext';
 import auth from '@react-native-firebase/auth';
 import { serverPort, serverHost } from './consts';
-import { fetchWithToken } from './api';
 import catBackground from './cat_background.jpg';
 
 if (Platform.OS === 'android') {
@@ -17,10 +16,33 @@ if (Platform.OS === 'android') {
 
 export default function SettingsScreen({ navigation }) {
   const { t, i18n } = useTranslation();
-  const { setUser, setSubscriptionId, setPlanType, setSubEndDate, planType, subEndDate, user } = useContext(AuthContext);
+  const { setUser, setSubscriptionId, setPlanType, setSubEndDate, planType, subEndDate, user, fetchWithToken } = useContext(AuthContext);
   const stripe = useStripe();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(null);
+
+
+  const [isUpgradeMode, setIsUpgradeMode] = useState(false);
+
+  useEffect(() => {
+    const fetchSubscriptionStatus = async () => {
+      try {
+        const response = await fetchWithToken(`https://${serverHost}:${serverPort}/subscription-status?email=${user.email}`, {
+          method: 'GET',
+        });
+        const data = await response.json();
+        setSubscriptionId(data.subscriptionId);
+        setPlanType(data.plan);
+        setSubEndDate(data.subscriptionEndDate);
+        setCancelAtPeriodEnd(data.cancelAtPeriodEnd);
+      } catch (error) {
+        console.error('Error fetching subscription status:', error);
+      }
+    };
+
+    fetchSubscriptionStatus();
+  }, [user.email]);
 
   const handleLogout = async () => {
     try {
@@ -40,19 +62,22 @@ export default function SettingsScreen({ navigation }) {
     return t(`stripeError.${errorCode}`, { defaultValue: t('stripeError.payment_failed') });
   };
 
+  
+  
   const handleCheckout = async (checkoutPlan) => {
     showSnackbar(t('waitMessage'));
+  
     try {
-      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/create-subscription`, {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/${isUpgradeMode ? 'upgrade-subscription' : 'create-subscription'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email: user.email, plan: checkoutPlan, language: i18n.language }),
       });
-
-      const { paymentIntent, ephemeralKey, customer, subscriptionId, plan, subscriptionEndDate } = await response.json();
-
+  
+      const { paymentIntent, ephemeralKey, customer, subscriptionId, plan, subscriptionEndDate, cancelAtPeriodEnd } = await response.json();
+  
       const { error } = await stripe.initPaymentSheet({
         paymentIntentClientSecret: paymentIntent,
         customerEphemeralKeySecret: ephemeralKey,
@@ -60,28 +85,94 @@ export default function SettingsScreen({ navigation }) {
         merchantDisplayName: 'Clipurr',
         defaultBillingDetails: {
           address: {
-            country: i18n.language, // Use the current language as the country code if applicable
+            country: i18n.language,
           }
         }
       });
-
+  
       if (!error) {
         const { error: paymentError } = await stripe.presentPaymentSheet();
-
+  
         if (paymentError) {
           paymentError.code !== 'Canceled' && showSnackbar(`${t('error')}: ${getLocalizedErrorMessage(paymentError.code)}`);
+          if (paymentError.code === 'Canceled' && isUpgradeMode) {
+            setIsUpgradeMode(false); // Reset upgrade mode if payment is canceled
+          }
         } else {
-          setSubscriptionId(subscriptionId);
-          setPlanType(plan);
-          setSubEndDate(subscriptionEndDate);
           showSnackbar(t('paymentSuccess'));
+          if (isUpgradeMode) {
+            setIsUpgradeMode(false); // Reset upgrade mode after successful payment
+          } else {
+            setSubscriptionId(subscriptionId);
+            setPlanType(plan);
+            setSubEndDate(subscriptionEndDate);
+            setCancelAtPeriodEnd(cancelAtPeriodEnd);
+          }
         }
       } else {
         showSnackbar(t('failedToInitialize'));
+        if (isUpgradeMode) {
+          setIsUpgradeMode(false); // Reset upgrade mode if initialization fails
+        }
       }
     } catch (error) {
       console.error('Error initializing payment:', error);
       showSnackbar(t('failedToInitialize'));
+      if (isUpgradeMode) {
+        setIsUpgradeMode(false); // Reset upgrade mode if error occurs
+      }
+    }
+  };
+
+
+
+  const handleCancelSubscription = async () => {
+    try {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/cancel-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: user.email }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setCancelAtPeriodEnd(true);
+        setSnackbarMessage(t('subscriptionCancelled'));
+        showSnackbar(t('subscriptionCancelled'));
+      } else {
+        showSnackbar(result.error || t('failedToCancel'));
+      }
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      showSnackbar(t('failedToCancel'));
+    }
+  };
+
+  const handleRenewSubscription = async () => {
+    try {
+      const response = await fetchWithToken(`https://${serverHost}:${serverPort}/renew-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: user.email }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setCancelAtPeriodEnd(false);
+        setSnackbarMessage(t('subscriptionRenewed'));
+        showSnackbar(t('subscriptionRenewed'));
+      } else {
+        showSnackbar(result.error || t('failedToRenew'));
+      }
+    } catch (error) {
+      console.error('Error renewing subscription:', error);
+      showSnackbar(t('failedToRenew'));
     }
   };
 
@@ -101,35 +192,83 @@ export default function SettingsScreen({ navigation }) {
               <Card.Title title={t('subscribeMonthly')} />
               <Card.Content>
                 <Text>{t('monthlyPlanDescription')}</Text>
-                {planType === "monthly" && subEndDate && (
-                  <Text style={styles.subscriptionEndDate}>{`${t('subscriptionEndDate')}: ${subEndDate}`}</Text>
+                { subEndDate && ( planType === "monthly" ?
+
+                <Text style={styles.subscriptionEndDate}>{`${t('subscriptionEndDate')}: ${subEndDate}`}</Text> : 
+
+                <Text style={[styles.subscriptionEndDate, {color: 'rgba(0,0,0,0)'}]}>{`${t('subscriptionEndDate')}: ${subEndDate}`}</Text>
+                )}
+                {planType === "monthly" ? (
+                  cancelAtPeriodEnd ? (
+                    <Button
+                      mode="outlined"
+                      onPress={handleRenewSubscription}
+                      style={styles.button}
+                    >
+                      {t('renew')}
+                    </Button>
+                  ) : (
+                    <Button
+                      mode="outlined"
+                      onPress={handleCancelSubscription}
+                      style={styles.button}
+                    >
+                      {t('cancel')}
+                    </Button>
+                  )
+                ) : (
+                  planType === null &&
+                    <Button
+                      mode="outlined"
+                      style={styles.button}
+                      onPress={() => {handleCheckout("monthly");}}
+                    >
+                      {t('subscribe')}
+                    </Button>
+                  
                 )}
               </Card.Content>
-              <Card.Actions>
-                <Button
-                  onPress={() => handleCheckout('monthly')}
-                  style={styles.button}
-                >
-                  {t('subscribe')}
-                </Button>
-              </Card.Actions>
             </Card>
             <Card style={[styles.card, planType === "yearly" && { borderWidth: 2, borderColor: 'rgb(103, 80, 164)' }]}>
               <Card.Title title={t('subscribeYearly')} />
               <Card.Content>
                 <Text>{t('yearlyPlanDescription')}</Text>
-                {planType === "yearly" && subEndDate && (
-                  <Text style={styles.subscriptionEndDate}>{`${t('subscriptionEndDate')}: ${subEndDate}`}</Text>
+                { subEndDate && ( planType === "yearly" ?
+
+                <Text style={styles.subscriptionEndDate}>{`${t('subscriptionEndDate')}: ${subEndDate}`}</Text> : 
+
+                <Text style={[styles.subscriptionEndDate, {color: 'rgba(0,0,0,0)'}]}>{`${t('subscriptionEndDate')}: ${subEndDate}`}</Text>
+                )}
+                {planType === "yearly" ? (
+                  cancelAtPeriodEnd ? (
+                    <Button
+                      mode="outlined"
+                      onPress={handleRenewSubscription}
+                      style={styles.button}
+                    >
+                      {t('renew')}
+                    </Button>
+                  ) : (
+                    <Button
+                      mode="outlined"
+                      onPress={handleCancelSubscription}
+                      style={styles.button}
+                    >
+                      {t('cancel')}
+                    </Button>
+                  )
+                ) : (
+                  planType === null &&
+                    <Button
+                      mode="outlined"
+                      style={styles.button}
+                      onPress={() => {handleCheckout("yearly");}}
+                    >
+                      {t('subscribe')}
+                    </Button>
+                  
                 )}
               </Card.Content>
-              <Card.Actions>
-                <Button
-                  onPress={() => handleCheckout('yearly')}
-                  style={styles.button}
-                >
-                  {t('subscribe')}
-                </Button>
-              </Card.Actions>
             </Card>
           </View>
         </View>
@@ -176,7 +315,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   paymentContainer: {
-    padding: 8,
   },
   cardContainer: {
     flexDirection: 'row',
@@ -188,6 +326,7 @@ const styles = StyleSheet.create({
     margin: 8,
   },
   button: {
+    padding: -10,
     marginTop: 16,
   },
   subscriptionEndDate: {

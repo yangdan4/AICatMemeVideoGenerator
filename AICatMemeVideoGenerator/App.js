@@ -23,9 +23,6 @@ import TicketDetailsScreen from './TicketDetailsScreen';
 import AdminTicketDetailScreen from './AdminTicketDetailScreen';
 import ScriptScreen from './ScriptScreen';
 import VideoEditor from './VideoEditor';
-import PaymentScreen from './PaymentScreen.js';
-import SuccessScreen from './SuccessScreen'; // Import SuccessScreen
-import CancelScreen from './CancelScreen'; // Import CancelScreen
 import './i18n.js'; // Make sure to import the i18n configuration
 
 // Your web app's Firebase configuration

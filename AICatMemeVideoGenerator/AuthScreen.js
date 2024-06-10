@@ -13,13 +13,11 @@ import logo from './logo.png'; // Import the logo image
 
 export default function AuthScreen() {
   const { t } = useTranslation();
-  const { setUser } = useContext(AuthContext);
-  const [email, setEmail] = useState('');
+  const { setUser, email, setEmail, deviceId, setDeviceId } = useContext(AuthContext);
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [deviceId, setDeviceId] = useState(null);
 
   useEffect(() => {
     DeviceInfo.getUniqueId().then(id => {

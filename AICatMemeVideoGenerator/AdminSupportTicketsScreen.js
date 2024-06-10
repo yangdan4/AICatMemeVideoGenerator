@@ -4,7 +4,6 @@ import { Text, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
-import { fetchWithToken } from './api';
 import catBackground from './cat_background.jpg';
 
 export default function AdminSupportTicketsScreen({ navigation }) {
@@ -12,7 +11,7 @@ export default function AdminSupportTicketsScreen({ navigation }) {
   const [tickets, setTickets] = useState([]);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const { sentReport } = useContext(AuthContext);
+  const { sentReport, fetchWithToken } = useContext(AuthContext);
 
   useEffect(() => {
     fetchTickets();

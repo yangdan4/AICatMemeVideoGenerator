@@ -4,7 +4,6 @@ import { TextInput, Button, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
-import { fetchWithToken } from './api';
 import catBackground from './cat_background.jpg';
 
 export default function BugReportScreen({ route, navigation }) {
@@ -13,7 +12,7 @@ export default function BugReportScreen({ route, navigation }) {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const { screenshotUri } = route.params;
-  const { user, setSentReport, sentReport } = useContext(AuthContext);
+  const { user, setSentReport, sentReport, fetchWithToken } = useContext(AuthContext);
 
   const sendBugReport = async () => {
     const formData = new FormData();

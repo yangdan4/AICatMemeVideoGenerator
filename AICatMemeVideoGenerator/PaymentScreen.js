@@ -3,14 +3,13 @@ import { View, StyleSheet, ImageBackground, Text } from 'react-native';
 import { Button, Snackbar, Card } from 'react-native-paper';
 import { useStripe } from '@stripe/stripe-react-native';
 import { serverPort, serverHost } from './consts';
-import { fetchWithToken } from './api';
 import { AuthContext } from './AuthContext';
 import { useTranslation } from 'react-i18next';
 
 import catBackground from './cat_background.jpg';
 
 export default function PaymentScreen() {
-    const { setSubscriptionId, user } = useContext(AuthContext);
+    const { setSubscriptionId, user, fetchWithToken } = useContext(AuthContext);
     const stripe = useStripe();
     const { t } = useTranslation();
     const [snackbarVisible, setSnackbarVisible] = useState(false);

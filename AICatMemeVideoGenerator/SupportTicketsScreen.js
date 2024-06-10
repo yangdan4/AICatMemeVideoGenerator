@@ -4,7 +4,6 @@ import { Text, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
-import { fetchWithToken } from './api';
 import catBackground from './cat_background.jpg';
 
 import { toBlobURL, fetchFile } from "@ffmpeg/util";
@@ -14,7 +13,7 @@ export default function SupportTicketsScreen({ navigation }) {
   const [tickets, setTickets] = useState([]);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const { user, sentReport } = useContext(AuthContext);
+  const { user, sentReport, fetchWithToken } = useContext(AuthContext);
 
   useEffect(() => {
     fetchTickets();

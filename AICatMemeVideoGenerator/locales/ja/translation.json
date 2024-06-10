@@ -168,6 +168,11 @@
   "payment": "支払い",
   "subscription": "サブスクリプション",
   "subscribe": "選ぶ",
+  "subscriptionCancelled": "サブスクリプションをキャンセルしました",
+  "failedToCancel": "キャンセルが失敗しました",
+  "subscriptionRenewed": "サブスクリプションが更新されました",
+  "failedToRenew": "更新が失敗しました",
+  "renew": "更新する",
   "chooseYourPlan": "プランを選ぶ",
   "stripeError": {
     "payment_failed": "支払いが失敗しました。もう一度お試しください。",

@@ -169,6 +169,11 @@
   "payment": "支付",
   "subscription": "订阅",
   "subscribe": "订阅",
+  "subscriptionCancelled": "订阅已取消",
+  "failedToCancel": "取消失败",
+  "subscriptionRenewed": "订阅已续订",
+  "failedToRenew": "续订失败",
+  "renew": "续订",
   "chooseYourPlan": "选择订阅时长",
   "stripeError": {
     "payment_failed": "支付失败。请再试一次。",
