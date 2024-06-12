@@ -1,4 +1,5 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
+import {Appearance} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -235,6 +236,8 @@ const AppNavigator = () => {
 };
 
 export default function App() {
+  useEffect(() => Appearance.setColorScheme('light'),
+  [])
   return (
     <StripeProvider
       publishableKey={stripeKey}
