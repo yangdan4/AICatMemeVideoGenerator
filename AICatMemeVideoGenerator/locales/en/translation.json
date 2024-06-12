@@ -356,5 +356,7 @@
   },
   "monthlyPlanDescription": "$10/month \nUnlimited Access \nNo Watermark",
   "yearlyPlanDescription": "$100/year \nUnlimited access \nNo Watermark",
-  "subscriptionEndDate": "End Date"
+  "subscriptionEndDate": "End Date",
+  "back": "Back",
+  "discardChanges": "Discard Changes"
 }

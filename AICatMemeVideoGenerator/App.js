@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider, Text } from 'react-native-paper';
+import 'react-native-gesture-handler';
 
 import { StripeProvider } from '@stripe/stripe-react-native';
 import AuthScreen from './AuthScreen';
@@ -86,7 +87,7 @@ const HomeTabs = () => {
 
           return <Text style={{ color: "rgb(103, 80, 164)", fontSize: 10 }}>{label}</Text>;
         },
-        tabBarStyle: { backgroundColor: '#f5f5f5' }
+        tabBarStyle: { backgroundColor: '#ffffff' }
       })}
     >
       <Tab.Screen name="ScriptEditor" component={ScriptScreen} options={{ headerShown: false }} />
@@ -137,7 +138,7 @@ const AdminTabs = () => {
 
           return <Text style={{ color: "rgb(103, 80, 164)", fontSize: 10 }}>{label}</Text>;
         },
-        tabBarStyle: { backgroundColor: '#f5f5f5' }
+        tabBarStyle: { backgroundColor: '#ffffff' }
       })}
     >
       <Tab.Screen name="SupportTickets" component={AdminSupportTicketsScreen} options={{ headerShown: false }} />
@@ -170,12 +171,18 @@ const AppNavigator = () => {
                 <Stack.Screen
                   name="AdminHome"
                   component={AdminTabs}
-                  options={{ header: ({ navigation }) => <HeaderWithBugReport navigation={navigation} /> }}
+                  options={{ 
+                    header: ({ navigation }) => <HeaderWithBugReport navigation={navigation} />,
+                    headerBackTitle: t('back'),
+                  }}
                 />
                 <Stack.Screen
                   name="AdminTicketDetail"
                   component={AdminTicketDetailScreen}
-                  options={{ title: t('ticketDetail') }}
+                  options={{ 
+                    title: t('ticketDetail'),
+                    headerBackTitle: t('back'),
+                  }}
                 />
               </>
             ) : (
@@ -183,22 +190,34 @@ const AppNavigator = () => {
                 <Stack.Screen
                   name="Home"
                   component={HomeTabs}
-                  options={{ header: ({ navigation }) => <HeaderWithBugReport navigation={navigation} /> }}
+                  options={{ 
+                    header: ({ navigation }) => <HeaderWithBugReport navigation={navigation} />,
+                    headerBackTitle: t('back'),
+                  }}
                 />
                 <Stack.Screen
                   name="BugReport"
                   component={BugReportScreen}
-                  options={{ title: t('bugReport') }}
+                  options={{ 
+                    title: t('bugReport'),
+                    headerBackTitle: t('back'),
+                  }}
                 />
                 <Stack.Screen
                   name="TicketDetail"
                   component={TicketDetailsScreen}
-                  options={{ title: t('ticketDetail') }}
+                  options={{ 
+                    title: t('ticketDetail'),
+                    headerBackTitle: t('back'),
+                  }}
                 />
                 <Stack.Screen
                   name="VideoEditor"
                   component={VideoEditor}
-                  options={{ title: t('videoEditor') }}
+                  options={{ 
+                    title: t('videoEditor'),
+                    headerBackTitle: t('back'),
+                  }}
                 />
               </>
             )

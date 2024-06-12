@@ -355,5 +355,6 @@
   },
   "monthlyPlanDescription": "70元/月 \n无限使用 \n无水印",
   "yearlyPlanDescription": "700元/年 \n无限使用 \n无水印",
-  "subscriptionEndDate": "结束日期"
+  "subscriptionEndDate": "结束日期",
+  "back": "返回"
 }

@@ -7,7 +7,8 @@ import { AuthContext } from './AuthContext';
 import { VideoContext } from './VideoContext';
 import { serverHost, serverPort, actionVideoDict } from './consts';
 import RNFetchBlob from 'rn-fetch-blob';
-import catBackground from './cat_background.jpg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import catBackground from './cat_background_new.png';
 const PAGE_SIZE = 3;
 
 const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLocation }) => {
@@ -21,24 +22,18 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLoc
   const filteredItems = items.filter(item => 
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   function convertImageFileName(input) {
-    // Trim any leading or trailing whitespace
     let trimmedInput = input.trim();
-  
-    // Check if the input ends with a number
     let match = trimmedInput.match(/(.*?)(\d+)$/);
-    
     if (match) {
-      // If it ends with a number, format the string and append the number
       let base = match[1].trim().toLowerCase().replace(/\s+/g, '_');
       return `${base}_${match[2]}`;
     } else {
-      // If it does not end with a number, format the string and append 1
       let base = trimmedInput.toLowerCase().replace(/\s+/g, '_');
       return `${base}_1`;
     }
   }
-  
 
   const handleViewYoutube = (videoId) => {
     if (videoId) {
@@ -105,8 +100,7 @@ const SearchModal = ({ visible, onClose, items, onSelectItem, placeholder, isLoc
         <View style={styles.youtubeModalOverlay}>
           <View style={styles.youtubeModalContainer}>
             <Image
-
-              style={styles.image} // Add style to image
+              style={styles.image}
               source={{uri: picUrl}}
             />
             <Button style={{width: '100%'}} onPress={() => setPicVisible(false)}>{t('close')}</Button>
@@ -267,7 +261,6 @@ const ScriptScreen = ({ navigation }) => {
       setSnackbarMessage(t('scriptDone'));
       setSnackbarVisible(true);
     } catch (error) {
-      // console.error("Error in generateScript:", error);
       setSnackbarMessage(t('errorGeneratingScript'));
       setSnackbarVisible(true);
     } finally {
@@ -338,19 +331,23 @@ const ScriptScreen = ({ navigation }) => {
     }
   };
 
+  const handleDiscardChanges = () => {
+    fetchAllScripts();
+    setEditMode(false);
+    setCurrentScript(null);
+  };
+
   const validateScript = (script) => {
     for (const scene of script.scenes) {
       if (!scene.location || !scene.scene_index || isNaN(scene.scene_index) || scene.scene_index <= 0) {
         return t('pleaseFillAllFields');
-      }
-      else if (scene.location && !locations.includes(scene.location)) {
+      } else if (scene.location && !locations.includes(scene.location)) {
         return t('pleaseValidLocation');
       }
       for (const character of scene.characters) {
         if (!character.identity || !character.action || !character.words || !character.enter || !character.exit) {
           return t('pleaseFillAllFields');
-        }
-        else if (character.action && !actions.includes(character.action)) {
+        } else if (character.action && !actions.includes(character.action)) {
           return t('pleaseValidAction');
         }
         if (!isValidTimeFormat(character.enter) || !isValidTimeFormat(character.exit)) {
@@ -400,20 +397,25 @@ const ScriptScreen = ({ navigation }) => {
       setIsSending(false);
     }
   };
-
-  const saveVideoBlob = async (response, script_name) => {
+  
+  const saveVideoBlob = async (response, originalName) => {
     const { fs } = RNFetchBlob;
     const videoDir = fs.dirs.DocumentDir;
-    const filePath = `${videoDir}/${script_name}.mp4`;
+    const uniqueIdentifier = `${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    const filePath = `${videoDir}/${uniqueIdentifier}.mp4`;
   
     return new Promise((resolve, reject) => {
       const writeFile = (blob) => {
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           const base64data = reader.result.split(',')[1]; // Extract base64 data
-          RNFetchBlob.fs.writeFile(filePath, base64data, 'base64')
-            .then(() => resolve(filePath)) // Return the file path
-            .catch(reject);
+          try {
+            await RNFetchBlob.fs.writeFile(filePath, base64data, 'base64');
+            await AsyncStorage.setItem(filePath, originalName); // Store mapping
+            resolve(filePath); // Return the file path
+          } catch (error) {
+            reject(error);
+          }
         };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
@@ -563,7 +565,6 @@ const ScriptScreen = ({ navigation }) => {
     }));
   };
 
-
   const renderScriptCard = useCallback(
     ({ item }) => (
       <Card style={styles.scriptCard}>
@@ -590,12 +591,12 @@ const ScriptScreen = ({ navigation }) => {
                   />
                   <TouchableOpacity onPress={() => {setLocationModalVisible(true); setCurrentSceneIndex(scene.scene_index); setCurrentCharacterIndex(null);}}>
                     <TextInput
-                      
                       textColor={scene.location && !locations.includes(scene.location) ? 'red' : 'black'}
                       style={styles.input}
                       label={ t('location')}
-                      value={scene.location && !locations.includes(scene.location) ? `${scene.location} ${t('(suggested)')}` : scene.location}
+                      value={scene.location && !locations.includes(scene.location) ? `${scene.location} ${t('(suggested)')}` : t(scene.location)}
                       editable={false}
+                      pointerEvents="none"
                     />
                   </TouchableOpacity>
                   {scene.characters.map((character, characterIndex) => (
@@ -613,15 +614,17 @@ const ScriptScreen = ({ navigation }) => {
                         label={t('identity')}
                         value={character.identity}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'identity')}
+                        multiline
+                        numberOfLines={4}
                       />
                       <TouchableOpacity onPress={() => {setActionModalVisible(true); setCurrentSceneIndex(scene.scene_index); setCurrentCharacterIndex(characterIndex);}}>
                         <TextInput
-                      
                           textColor={character.action && !actions.includes(character.action) ? 'red' : 'black'}
                           style={styles.input}
                           label={ t('action')}
-                          value={character.action && !actions.includes(character.action) ? `${character.action} ${t('(suggested)')}` : character.action}
+                          value={character.action && !actions.includes(character.action) ? `${character.action} ${t('(suggested)')}` : t(character.action)}
                           editable={false}
+                          pointerEvents="none"
                         />
                       </TouchableOpacity>
                       <TextInput
@@ -629,18 +632,24 @@ const ScriptScreen = ({ navigation }) => {
                         label={t('words')}
                         value={character.words}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'words')}
+                        multiline
+                        numberOfLines={4}
                       />
                       <TextInput
                         style={styles.input}
                         label={t('enterTime')}
                         value={character.enter}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'enter')}
+                        multiline
+                        numberOfLines={2}
                       />
                       <TextInput
                         style={styles.input}
                         label={t('exitTime')}
                         value={character.exit}
                         onChangeText={(value) => handleCharacterChange(value, scene.scene_index, characterIndex, 'exit')}
+                        multiline
+                        numberOfLines={2}
                       />
                     </View>
                   ))}
@@ -649,6 +658,7 @@ const ScriptScreen = ({ navigation }) => {
               ))}
               <Button style={{ marginBottom: 5 }} icon="plus" onPress={() => handleAddScene()}>{t('addScene')}</Button>
               <Button style={{ marginBottom: 5 }} onPress={handleSaveScript}>{t('saveScript')}</Button>
+              <Button style={{ marginBottom: 5 }} onPress={handleDiscardChanges}>{t('close')}</Button>
             </ScrollView>
           ) : (
             <>
@@ -712,6 +722,8 @@ const ScriptScreen = ({ navigation }) => {
               onChangeText={setPrompt}
               style={styles.input}
               mode="outlined"
+              multiline
+              numberOfLines={4}
             />
             <Button mode="contained" onPress={generateScript} style={styles.button} disabled={isSending}>
               {t('generateScript')}
@@ -787,7 +799,7 @@ const styles = StyleSheet.create({
   },
   animatedCard: {
     marginBottom: 16,
-    paddingTop: 32, // Adjust this value as needed
+    paddingTop: 32,
   },
   input: {
     marginBottom: 16,
@@ -833,8 +845,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   scrollView: {},
-  removeButton: {
-  },
+  removeButton: {},
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -844,14 +855,13 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
   },
   backgroundImage: {
     flex: 1,
     resizeMode: 'stretch',
     justifyContent: 'center',
   },
-
   youtubeModalOverlay: {
     flex: 1,
     justifyContent: 'center',

@@ -6,7 +6,7 @@ import { useStripe } from '@stripe/stripe-react-native';
 import { AuthContext } from './AuthContext';
 import auth from '@react-native-firebase/auth';
 import { serverPort, serverHost } from './consts';
-import catBackground from './cat_background.jpg';
+import catBackground from './cat_background_new.png';
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   accordionBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
@@ -308,6 +308,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 8,
+    backgroundColor: 'transparent'
   },
   backgroundImage: {
     flex: 1,
@@ -324,6 +325,10 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     margin: 8,
+    shadowColor: 'rgba(0,0,0, .2)',
+    shadowOffset: { height: 0, width: 0 },
+    shadowOpacity: 0, //default is 1
+    shadowRadius: 0//default is 1
   },
   button: {
     padding: -10,

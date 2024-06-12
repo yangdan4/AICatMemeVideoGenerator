@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
   },
   assetThumbnail: {
     width: 50,

@@ -354,5 +354,6 @@
   },
   "monthlyPlanDescription": "月額¥1500 \n無制限アクセス \n透かしなし",
   "yearlyPlanDescription": "年額¥15000 \n無制限アクセス \n透かしなし",
-  "subscriptionEndDate": "終了日"
+  "subscriptionEndDate": "終了日",
+  "back": "戻る"
 }

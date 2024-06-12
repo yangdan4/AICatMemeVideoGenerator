@@ -1,12 +1,13 @@
 import React, { useRef, useContext, useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, ImageBackground } from 'react-native';
 import { Button, Card, Text, Searchbar, Dialog, Portal } from 'react-native-paper';
+import RNFetchBlob from 'rn-fetch-blob';
 import Share from 'react-native-share';
 import { VideoContext } from './VideoContext';
 import Video from 'react-native-video';
 import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import catBackground from './cat_background.jpg';
+import catBackground from './cat_background_new.png';
 
 const PAGE_SIZE = 5;
 
@@ -14,7 +15,7 @@ export default function VideoManagementScreen() {
 
   
   const { t } = useTranslation();
-  const { videos, deleteVideo } = useContext(VideoContext);
+  const { videos, deleteVideo, videoMappings } = useContext(VideoContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredVideos, setFilteredVideos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,8 +25,10 @@ export default function VideoManagementScreen() {
   const [videoToDelete, setVideoToDelete] = useState(null);
 
   useEffect(() => {
-    setFilteredVideos(videos);
-  }, [videos]);
+    if (isFocused) {
+      setFilteredVideos(videos);
+    }
+  }, [isFocused, videos]);
 
   useEffect(() => {
     paginateVideos();
@@ -82,33 +85,41 @@ export default function VideoManagementScreen() {
   const confirmDeleteVideo = async () => {
     hideDeleteDialog();
     if (videoToDelete) {
-      deleteVideo(videoToDelete);
+      try {
+        await AsyncStorage.removeItem(videoToDelete); // Remove mapping
+        deleteVideo(videoToDelete);
+      } catch (error) {
+        console.error('Error deleting video mapping:', error);
+      }
     }
   };
 
   const renderVideoCard = useCallback(
-    ({ item }) => (
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text>{item.split('/').pop()}</Text>
-          <Video
-            source={{ uri: `file://${item}` }}
-            style={styles.video}
-            controls={true}
-            paused={true}
-          />
-          <View style={styles.buttonGroup}>
-            <Button onPress={() => showDeleteDialog(item)} style={{ marginRight: 10 }}>
-              {t('delete')}
-            </Button>
-            <Button  onPress={() => shareVideo(item)}>
-              {t('share')}
-            </Button>
-          </View>
-        </Card.Content>
-      </Card>
-    ),
-    []
+    ({ item }) => {
+      const originalName = videoMappings[item] || item.split('/').pop().split('.mp4')[0];
+      return (
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text>{originalName}</Text>
+            <Video
+              source={{ uri: `file://${item}` }}
+              style={styles.video}
+              controls={true}
+              paused={true}
+            />
+            <View style={styles.buttonGroup}>
+              <Button onPress={() => showDeleteDialog(item)} style={{ marginRight: 10 }}>
+                {t('delete')}
+              </Button>
+              <Button onPress={() => shareVideo(item)}>
+                {t('share')}
+              </Button>
+            </View>
+          </Card.Content>
+        </Card>
+      );
+    },
+    [videoMappings]
   );
 
   return (
@@ -121,7 +132,6 @@ export default function VideoManagementScreen() {
         style={styles.searchbar}
       />
       <FlatList
-        key={isFocused}
         data={paginatedVideos}
         renderItem={renderVideoCard}
         keyExtractor={(item, index) => index.toString()}

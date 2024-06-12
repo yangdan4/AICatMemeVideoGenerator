@@ -4,7 +4,7 @@ import { TextInput, Button, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
-import catBackground from './cat_background.jpg';
+import catBackground from './cat_background_new.png';
 
 export default function BugReportScreen({ route, navigation }) {
   const { t } = useTranslation();

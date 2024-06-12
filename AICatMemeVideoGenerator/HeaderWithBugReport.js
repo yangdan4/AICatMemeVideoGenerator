@@ -38,7 +38,7 @@ export default function HeaderWithBugReport({ navigation }) {
 const styles = StyleSheet.create({
   header: {
     height: 40, // Adjusted height for thinner header
-    backgroundColor: '#f5f5f5'
+    backgroundColor: '#ffffff'
   },
   content: {
     flex: 1,

@@ -8,7 +8,7 @@ import DeviceInfo from 'react-native-device-info';
 import { serverHost, serverPort } from './consts';
 import { apiKey } from './frontend_secret_key';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import catBackground from './cat_background.jpg';
+import catBackground from './cat_background_new.png';
 import logo from './logo.png'; // Import the logo image
 
 export default function AuthScreen() {
@@ -97,6 +97,7 @@ export default function AuthScreen() {
       <View style={styles.container}>
         <Image source={logo} style={styles.logo} />
         <TextInput
+          testID="email-input"
           label={t('email')}
           value={email}
           onChangeText={setEmail}
@@ -105,6 +106,7 @@ export default function AuthScreen() {
         />
         <View style={styles.passwordContainer}>
           <TextInput
+            testID="password-input"
             label={t('password')}
             value={password}
             onChangeText={setPassword}
@@ -118,10 +120,12 @@ export default function AuthScreen() {
             style={styles.eyeIcon}
           />
         </View>
-        <Button mode="contained" onPress={handleLogin} style={styles.button}>
+        <Button mode="contained"
+          testID="login-button" onPress={handleLogin} style={styles.button}>
           {t('login')}
         </Button>
-        <Button mode="outlined" onPress={handleSignUp} style={styles.button}>
+        <Button mode="outlined"
+            testID="signup-button" onPress={handleSignUp} style={styles.button}>
           {t('signUp')}
         </Button>
         <Snackbar

@@ -8,6 +8,7 @@ import { apiKey } from './frontend_secret_key';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  
     const [user, setUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [sentReport, setSentReport] = useState(false);

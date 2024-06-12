@@ -4,7 +4,7 @@ import { Text, TextInput, Button, Card, Snackbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { serverHost, serverPort } from './consts';
-import catBackground from './cat_background.jpg';
+import catBackground from './cat_background_new.png';
 
 export default function TicketDetailScreen({ route }) {
   const { t } = useTranslation();
